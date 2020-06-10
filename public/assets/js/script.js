@@ -15,6 +15,7 @@ let playerAlias = null;
 
 /* Log player connect/disconnect events */
 const infoFromAdmin = (data) => {
+	console.log("What is data:", data)
 	const notification = document.createElement('li');
 	notification.classList.add('list-group-item', 'list-group-item-light', 'notification');
 
@@ -28,8 +29,16 @@ const storePlayerClick = (click) => {
 
 }
 
-const updateActivePlayers = (players) => {
+const showActivePlayers = (players) => {
 	activePlayers.innerHTML = players.map(player => `<li class="player">${player}</li>`).join("");
+}
+
+const initGame = (players) => {
+
+	start.classList.add('hide');
+	gameView.classList.remove('hide');
+
+	showActivePlayers(players);
 }
 
 // Get player alias from form and emit "add-player" event to server
@@ -37,16 +46,8 @@ playerForm.addEventListener('submit', e => {
 	e.preventDefault();
 
 	playerAlias = document.querySelector('#player-alias').value;
-	socket.emit('add-player', playerAlias, (status) => {
-		console.log("Server acknowledged a new player joining", status);
 
-		if (status.joinGame) {
-			start.classList.add('hide');
-			gameView.classList.remove('hide');
-
-			updateActivePlayers(status.activePlayers);
-		}
-	});
+	socket.emit('add-player', playerAlias);
 });
 
 socket.on('reconnect', () => {
@@ -57,18 +58,15 @@ socket.on('reconnect', () => {
 	}
 });
 
-socket.on('active-players', (players) => {
-	updateActivePlayers(players);
-});
 
-socket.on('new-player-joined', (playerAlias) => {
-	infoFromAdmin(`${playerAlias} joined the game.`);
-});
-
-socket.on('player-disconnected', (username) => {
-	infoFromAdmin(`${playerAlias} left the game.`);
+socket.on('player-disconnected', (playerAlias) => {
+	infoFromAdmin(`${playerAlias} left the game`);
 });
 
 socket.on('player-click', (click) => {
 	storePlayerClick(click);
+});
+
+socket.on('init-game', (players) => {
+	initGame(players);
 });

@@ -70,6 +70,7 @@ h2 {
 }
 
 #players {
+	color: white;
 	width: 20%;
 	border-left: 1px solid #CDD7E2;
 }

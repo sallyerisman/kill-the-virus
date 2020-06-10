@@ -1,52 +1,58 @@
-/* SERVER-SIDE SCRIPT */
+// /* SERVER-SIDE SCRIPT */
 
-const debug = require('debug')('kill-the-virus:socket_controller');
-const players = {};
+// const debug = require('debug')('kill-the-virus:socket_controller');
 
-/* Get names of active players */
-function getActivePlayers() {
-	return Object.values(players);
-}
+// const players = {};
 
-/* Handle player disconnecting */
-function handlePlayerDisconnect() {
-	debug(`Socket ${this.id} left the game :(`);
+// /* Get names of active players */
+// function getActivePlayers() {
+// 	return Object.values(players);
+// }
 
-	// Let player know that the opponent left the game
-	if (players[this.id]) {
-		this.broadcast.emit('player-disconnected', players[this.id]);
-	}
+// /* Handle player disconnecting */
+// function handlePlayerDisconnect() {
+// 	debug(`Socket ${this.id} left the game :(`);
 
-	// Remove player from list of active players
-	delete players[this.id];
-}
+// 	// Let player know that the opponent left the game
+// 	if (players[this.id]) {
+// 		this.broadcast.emit('player-disconnected', players[this.id]);
+// 	}
 
-/* Handle when a player clicks */
-function handleClick (click) {
-	debug("Someone clicked");
-}
+// 	// Remove player from list of active players
+// 	delete players[this.id];
+// }
 
-/* Handle new player joining game */
-function handleNewPlayer(playerAlias, callback) {
-	debug("Player '%s' joined the game", playerAlias);
-	players[this.id] = playerAlias;
-	callback({
-		joinGame: true,
-		playerAliasInUse: false,
-		activePlayers: getActivePlayers(),
-	});
+// /* Handle when a player clicks */
+// function handleClick (click) {
+// 	debug("Someone clicked");
+// }
 
-	// Let player know that an opponent joined the game
-	this.broadcast.emit('new-player-joined', playerAlias);
+// /* Handle new player joining game */
+// function handleNewPlayer(playerAlias) {
+// 	debug("Player '%s' joined the game", playerAlias);
 
-	// Boradcast active players
-	this.broadcast.emit('active-players', getActivePlayers());
-}
+// 	const activePlayers = getActivePlayers();
 
-module.exports = function(socket) {
-	debug(`Client ${socket.id} connected!`);
+// 	if (activePlayers.length === 0) {
+// 		players[this.id] = playerAlias;
+// 		console.log("Waiting for an opponent to join...")
+// 	} else if ( activePlayers.length === 1) {
+// 		players[this.id] = playerAlias;
 
-	socket.on('disconnect', handlePlayerDisconnect);
-	socket.on('player-click', handleClick);
-	socket.on('add-player', handleNewPlayer);
-}
+// 		// Broadcast active players
+// 		this.emit('init-game', getActivePlayers());
+// 	} else {
+// 		console.log("Too many players...")
+// 	}
+// }
+
+// module.exports = function(socket) {
+// 	debug(`Client ${socket.id} connected!`);
+
+// 	socket.on('disconnect', handlePlayerDisconnect);
+// 	socket.on('player-click', handleClick);
+// 	socket.on('add-player', handleNewPlayer);
+// }
+
+
+

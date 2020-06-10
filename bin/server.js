@@ -25,7 +25,66 @@ app.set('port', port);
 const server = http.createServer(app);
 const io = SocketIO(server);
 
-io.on('connection', require('../controllers/socket_controller'));
+// io.on('connection', require('../controllers/socket_controller'));
+
+
+
+const players = {};
+
+/* Get names of active players */
+const getActivePlayers = () => {
+	return Object.values(players);
+}
+
+io.on("connection", (socket) => {
+
+	/* Handle player disconnecting */
+	socket.on('disconnect', () => {
+		debug(`Socket ${socket.id} left the game :(`);
+
+		// Let player know that the opponent left the game
+		if (players[socket.id]) {
+			socket.broadcast.emit('player-disconnected', players[socket.id]);
+		}
+
+		// Remove player from list of active players
+		delete players[socket.id];
+	});
+
+	/* Handle when a player clicks */
+	socket.on('handle-click', (click) => {
+		debug("Someone clicked");
+	});
+
+	/* Handle new player joining game */
+	socket.on('add-player', (playerAlias) => {
+		debug("Player '%s' joined the game", playerAlias);
+
+		const activePlayers = getActivePlayers();
+
+		if (activePlayers.length === 0) {
+			players[socket.id] = playerAlias;
+			console.log("Waiting for an opponent to join...")
+		} else if ( activePlayers.length === 1) {
+			players[socket.id] = playerAlias;
+
+			// Broadcast active players
+			io.emit('init-game', getActivePlayers());
+
+		} else {
+			console.log("Too many players...")
+		}
+	});
+
+});
+
+
+
+
+
+
+
+
 
 /**
  * Listen on provided port, on all network interfaces.
@@ -94,3 +153,4 @@ function onListening() {
     : 'port ' + addr.port;
   debug('Listening on ' + bind);
 }
+
