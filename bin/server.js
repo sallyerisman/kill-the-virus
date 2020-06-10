@@ -36,6 +36,11 @@ const getActivePlayers = () => {
 	return Object.values(players);
 }
 
+/* Generic function for getting a random number */
+const getRandomNumber = (range) => {
+	return Math.floor(Math.random() * range)
+};
+
 io.on("connection", (socket) => {
 
 	/* Handle player disconnecting */
@@ -51,11 +56,6 @@ io.on("connection", (socket) => {
 		delete players[socket.id];
 	});
 
-	/* Handle when a player clicks */
-	socket.on('handle-click', (click) => {
-		debug("Someone clicked");
-	});
-
 	/* Handle new player joining game */
 	socket.on('add-player', (playerAlias) => {
 		debug("Player '%s' joined the game", playerAlias);
@@ -68,12 +68,26 @@ io.on("connection", (socket) => {
 		} else if ( activePlayers.length === 1) {
 			players[socket.id] = playerAlias;
 
-			// Broadcast active players
+			// Emit active players
 			io.emit('init-game', getActivePlayers());
 
 		} else {
 			console.log("Too many players...")
 		}
+	});
+
+	/* Handle player click */
+	socket.on('player-click', (playerAlias) => {
+		console.log(playerAlias, "clicked")
+
+		const target = {
+			width: getRandomNumber(400),
+			height: getRandomNumber(400)
+		}
+
+		// Emit new image
+		io.emit('player-click', target);
+
 	});
 
 });

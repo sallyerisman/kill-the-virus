@@ -57,17 +57,31 @@ h2 {
 	margin-left: 5rem;
 	margin-right: 5rem;
 	width: 70%;
+
+	display: flex;
+	flex-direction: column;
+	align-items: center;
 }
 
 #playing-field {
 	background-image: url("../images/world_map.png");
-	background-size: 80%;
+	background-size: 90%;
 	background-repeat: no-repeat;
 	background-position: center;
-	height: 70vh;
+	height: 400px;
+	width: 400px;
 	border: 1px solid #CDD7E2;
 	border-radius: 3px;
+	position: relative;
 }
+
+#img-virus-play {
+	width: 3%;
+	position: absolute;
+	top: 200px;
+	left: 200px;
+}
+
 
 #players {
 	color: white;
