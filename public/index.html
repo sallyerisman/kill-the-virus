@@ -12,10 +12,33 @@
 
 <body>
 	<div id="app">
+		<div id="start" class="container">
+			<h1>Kill the Virus</h1>
+			<img class="img-virus-start" src="./assets/images/coronavirus-5058247_1280.png" alt="Virus icon">
+			<form id="player-form">
+				<div class="form-group">
+					<input type="text" id="player-alias" class="form-control form-control-lg" required placeholder="Enter your alias">
+				</div>
+				<button type="submit" id="btn-play" class="btn btn-success">Play</button>
+			</form><!-- End of player-form -->
+		</div><!-- End of start container -->
 
-	</div><!-- End of App -->
+		<div id="game-view" class="hide">
+			<div class="gameboard">
+				<h2>Kill the Virus</h2>
+				<div id="playing-field">
+				</div><!-- End of playing-field -->
+			</div> <!-- End of gameboard -->
+
+			<div id="players">
+				<h3>Players</h3>
+				<ul id="active-players"></ul>
+			</div><!-- End of players -->
+		</div><!-- End of game-view -->
+
+	</div><!-- End of app -->
 
 	<script src="/socket.io/socket.io.js"></script>
-	<script src="/assets/js/chat.js"></script>
+	<script src="/assets/js/script.js"></script>
 </body>
 </html>

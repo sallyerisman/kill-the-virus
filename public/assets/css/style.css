@@ -1,0 +1,86 @@
+@import url('https://fonts.googleapis.com/css2?family=Courier+Prime&display=swap');
+
+body {
+	font-family: 'Courier Prime', monospace;
+}
+
+h1, h2, h3, h4, h5, h6 {
+	color: white;
+	text-align: center;
+	margin-bottom: 1em;
+}
+
+h1 {
+	color: white;
+	font-size: 3em;
+}
+
+h2 {
+	padding-top: 1em;
+}
+
+
+#app {
+	background-color: #222;
+	height: 100vh;
+	width: 100vw;
+}
+
+#start {
+	display: flex;
+	flex-direction: column;
+	height: 100vh;
+	justify-content: center;
+	align-items: center;
+}
+
+.img-virus-start {
+	width: 20%;
+}
+
+#player-form {
+	margin-top: 2rem;
+	text-align: center;
+}
+
+.hide {
+	display: none !important;
+}
+
+#game-view {
+	display: flex;
+	justify-content: space-between;
+	height: 100vh;
+}
+
+.gameboard {
+	margin-left: 5rem;
+	margin-right: 5rem;
+	width: 70%;
+}
+
+#playing-field {
+	background-color: white;
+	height: 70vh;
+}
+
+#players {
+	width: 20%;
+	border-left: 1px solid white;
+}
+
+#players h3 {
+	background-color: #28A745;
+	padding: 0.5rem 0.75rem;
+}
+
+#players ul {
+	margin: 0;
+	padding: 0.5rem 0.75rem;
+	list-style: none;
+}
+
+#active-players .notification {
+	background-color: white;
+	font-style: italic;
+}
