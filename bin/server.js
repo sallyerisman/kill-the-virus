@@ -85,8 +85,16 @@ io.on("connection", (socket) => {
 			height: getRandomNumber(400)
 		}
 
+		const delay = getRandomNumber(5000);
+
+
+		const data = {
+			target,
+			delay,
+		}
+
 		// Emit new image
-		io.emit('player-click', target);
+		io.emit('player-click', data);
 
 	});
 

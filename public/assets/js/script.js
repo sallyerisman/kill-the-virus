@@ -29,7 +29,13 @@ const showActivePlayers = (players) => {
 	activePlayers.innerHTML = players.map(player => `<li class="player">${player}</li>`).join("");
 }
 
-const imgRandom = (target) => {
+const imgRandom = (data) => {
+	setTimeout(() => {
+		imgCoordinates(data.target)
+	}, data.delay);
+}
+
+const imgCoordinates = (target) => {
 	virus.style.left = target.width + "px";
 	virus.style.top = target.height + "px";
 }
@@ -45,7 +51,7 @@ const initGame = (players) => {
 /* Event handlers */
 
 // Generate new image in random position
-virus.addEventListener('click', e => {
+virus.addEventListener('click', () => {
 	socket.emit('player-click', playerAlias);
 });
 
@@ -77,6 +83,6 @@ socket.on('init-game', players => {
 	initGame(players);
 });
 
-socket.on('player-click', target => {
-	imgRandom(target);
+socket.on('player-click', (data) => {
+	imgRandom(data);
 });
