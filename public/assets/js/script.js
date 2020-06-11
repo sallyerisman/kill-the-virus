@@ -60,6 +60,8 @@ const initGame = (data) => {
 }
 
 const logReactionTime = (data) => {
+	document.querySelector('#reaction-times').innerHTML = "";
+
 	const reactionEl = document.createElement('li');
 
 	const alias = data.alias;
@@ -68,17 +70,33 @@ const logReactionTime = (data) => {
 	document.querySelector('#reaction-times').appendChild(reactionEl);
 }
 
+const logScore = (data, ownScore = false) => {
+	document.querySelector('#current-score').innerHTML = "";
+
+	const scoreEl = document.createElement('li');
+
+	const player = ownScore ? playerAlias : data.alias;
+	scoreEl.innerHTML = `<span id="alias">${player}</span>: ${data.score}`;
+
+	document.querySelector('#current-score').appendChild(scoreEl);
+}
+
 /* Event handlers */
 
-// Generate new image in random position
+let score = 0;
+// On player click, store data and emit "player-click" event
 virus.addEventListener('click', () => {
+
+	score ++;
+
 	const playerData = {
 		timeOfImg,
 		timeOfClick: new Date().getTime(),
 		playerAlias,
+		score,
 	}
+
 	socket.emit('player-click', playerData);
-	timer.innerHTML = "00:00:00";
 });
 
 // Get player alias from form and emit "add-player" event to server
@@ -110,6 +128,7 @@ socket.on('init-game', data => {
 });
 
 socket.on('player-click', data => {
+	logScore(data);
 	logReactionTime(data);
 	startRound(data);
 });

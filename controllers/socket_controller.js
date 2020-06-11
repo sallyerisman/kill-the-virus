@@ -42,13 +42,9 @@ function handlePlayerDisconnect() {
 
 /* Handle when a player clicks */
 function handleClick(playerData) {
-	console.log("What is playerData? ", playerData)
+	let score = 0;
 
-	const timeOfImg = playerData.timeOfImg;
-	const timeOfClick = playerData.timeOfClick;
-	const alias = playerData.playerAlias;
-
-	const reactionTime = (timeOfClick - timeOfImg) / 1000 + " seconds";
+	const reactionTime = ( playerData.timeOfClick - playerData.timeOfImg) / 1000 + " seconds";
 
 	const data = {
 		target: {
@@ -57,7 +53,9 @@ function handleClick(playerData) {
 		},
 		delay: getRandomNumber(5000),
 		reactionTime,
-		alias,
+		players: getActivePlayers(),
+		alias: playerData.playerAlias,
+		score: playerData.score,
 	}
 
 	// Emit new image
