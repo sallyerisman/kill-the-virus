@@ -7,6 +7,9 @@ const playerForm = document.querySelector('#player-form');
 
 const gameView = document.querySelector('#game-view');
 const playingField = document.querySelector('#playing-field');
+
+const timer = document.querySelector('#timer');
+
 const playersField = document.querySelector('#players');
 const activePlayers = document.querySelector('#active-players');
 
@@ -24,20 +27,24 @@ const infoFromAdmin = (data) => {
 	activePlayers.appendChild(notification);
 }
 
-
 const showActivePlayers = (players) => {
 	activePlayers.innerHTML = players.map(player => `<li class="player">${player}</li>`).join("");
 }
 
-const imgRandom = (data) => {
+const startTimer = (timestamp) => {
+	timer.innerHTML = "";
+	timer.innerHTML = timestamp;
+}
+
+const startRound = (data) => {
 	setTimeout(() => {
-		imgCoordinates(data.target)
+		imgCoordinates(data.target);
 	}, data.delay);
 }
 
 const imgCoordinates = (target) => {
-	virus.style.left = target.width + "px";
-	virus.style.top = target.height + "px";
+	virus.style.left = target.x + "px";
+	virus.style.top = target.y + "px";
 }
 
 const initGame = (players) => {
@@ -45,6 +52,7 @@ const initGame = (players) => {
 	gameView.classList.remove('hide');
 
 	showActivePlayers(players);
+	// startTimer();
 }
 
 
@@ -84,5 +92,11 @@ socket.on('init-game', players => {
 });
 
 socket.on('player-click', (data) => {
-	imgRandom(data);
+	startRound(data);
 });
+
+socket.on('start-timer', (timestamp) => {
+	startTimer(timestamp);
+});
+
+
