@@ -90,19 +90,19 @@ h2 {
 	left: 200px;
 }
 
-
-#players {
+#game-data {
 	color: white;
 	width: 20%;
 	border-left: 1px solid #CDD7E2;
 }
 
-#players h3 {
+#game-data h3 {
 	background-color: #28A745;
+	margin-bottom: 0;
 	padding: 0.5rem 0.75rem;
 }
 
-#players ul {
+#game-data ul {
 	margin: 0;
 	padding: 0.5rem 0.75rem;
 	list-style: none;
@@ -112,3 +112,4 @@ h2 {
 	background-color: white;
 	font-style: italic;
 }
+

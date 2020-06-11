@@ -33,16 +33,22 @@ function handlePlayerDisconnect() {
 	if (players[this.id]) {
 		this.broadcast.emit('player-disconnected', players[this.id]);
 	}
+		// Remove player from list of active players
+		delete players[this.id];
 
-	// Remove player from list of active players
-	delete players[this.id];
+		// Emit active players
+		io.emit('active-players', getActivePlayers());
 }
 
 /* Handle when a player clicks */
-function handleClick(playerAlias) {
-	console.log(playerAlias, "clicked")
+function handleClick(playerData) {
+	console.log("What is playerData? ", playerData)
 
-	startTimer();
+	const timeOfImg = playerData.timeOfImg;
+	const timeOfClick = playerData.timeOfClick;
+	const alias = playerData.playerAlias;
+
+	const reactionTime = (timeOfClick - timeOfImg) / 1000 + " seconds";
 
 	const data = {
 		target: {
@@ -50,10 +56,14 @@ function handleClick(playerAlias) {
 			y: getRandomNumber(400)
 		},
 		delay: getRandomNumber(5000),
+		reactionTime,
+		alias,
 	}
 
 	// Emit new image
 	io.emit('player-click', data);
+
+	startTimer();
 }
 
 /* Handle new player joining game */
@@ -65,11 +75,20 @@ function handleNewPlayer(playerAlias) {
 	if (activePlayers.length === 0) {
 		players[this.id] = playerAlias;
 		console.log("Waiting for an opponent to join...")
-	} else if ( activePlayers.length === 1) {
+	} else if (activePlayers.length === 1) {
 		players[this.id] = playerAlias;
 
+		const data = {
+			target: {
+				x: getRandomNumber(400),
+				y: getRandomNumber(400)
+			},
+			delay: getRandomNumber(5000),
+			activePlayers: getActivePlayers(),
+		}
+
 		// Emit active players
-		io.emit('init-game', getActivePlayers());
+		io.emit('init-game', data);
 	} else {
 		console.log("Too many players...")
 	}

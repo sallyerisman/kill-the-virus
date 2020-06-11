@@ -10,7 +10,7 @@ const playingField = document.querySelector('#playing-field');
 
 const timer = document.querySelector('#timer');
 
-const playersField = document.querySelector('#players');
+const gameData = document.querySelector('#game-data');
 const activePlayers = document.querySelector('#active-players');
 
 const virus = document.getElementById('img-virus-play');
@@ -32,35 +32,53 @@ const showActivePlayers = (players) => {
 }
 
 const startTimer = (timestamp) => {
-	timer.innerHTML = "";
 	timer.innerHTML = timestamp;
 }
+let timeOfImg = null;
 
 const startRound = (data) => {
+	virus.style.display = "none";
 	setTimeout(() => {
 		imgCoordinates(data.target);
+		timeOfImg = new Date().getTime();
 	}, data.delay);
 }
 
 const imgCoordinates = (target) => {
+	virus.style.display = "inline";
 	virus.style.left = target.x + "px";
 	virus.style.top = target.y + "px";
 }
 
-const initGame = (players) => {
+const initGame = (data) => {
 	start.classList.add('hide');
 	gameView.classList.remove('hide');
 
-	showActivePlayers(players);
-	// startTimer();
+	showActivePlayers(data.activePlayers);
+
+	startRound(data);
 }
 
+const logReactionTime = (data) => {
+	const reactionEl = document.createElement('li');
+
+	const alias = data.alias;
+	reactionEl.innerHTML = `${alias}: ${data.reactionTime}`;
+
+	document.querySelector('#reaction-times').appendChild(reactionEl);
+}
 
 /* Event handlers */
 
 // Generate new image in random position
 virus.addEventListener('click', () => {
-	socket.emit('player-click', playerAlias);
+	const playerData = {
+		timeOfImg,
+		timeOfClick: new Date().getTime(),
+		playerAlias,
+	}
+	socket.emit('player-click', playerData);
+	timer.innerHTML = "00:00:00";
 });
 
 // Get player alias from form and emit "add-player" event to server
@@ -87,15 +105,16 @@ socket.on('player-disconnected', playerAlias => {
 	infoFromAdmin(`${playerAlias} left the game`);
 });
 
-socket.on('init-game', players => {
-	initGame(players);
+socket.on('init-game', data => {
+	initGame(data);
 });
 
-socket.on('player-click', (data) => {
+socket.on('player-click', data => {
+	logReactionTime(data);
 	startRound(data);
 });
 
-socket.on('start-timer', (timestamp) => {
+socket.on('start-timer', timestamp => {
 	startTimer(timestamp);
 });
 
