@@ -4,8 +4,33 @@ const debug = require('debug')('kill-the-virus:socket_controller');
 const moment = require('moment');
 
 let io = null;
+let rounds = 0;
+
+const rooms = [
+	{
+		name: "Corona",
+		players: {},
+	},
+	{
+		name: "Ebola",
+		players: {},
+	},
+	{
+		name: "SARS",
+		players: {},
+	},
+	{
+		name: "Swine flu",
+		players: {},
+	},
+	{
+		name: "Zika",
+		players: {},
+	}
+];
 
 const players = {};
+
 
 /* Get names of active players */
 function getActivePlayers() {
@@ -16,6 +41,11 @@ function getActivePlayers() {
 function getRandomNumber(range) {
 	return Math.floor(Math.random() * range)
 };
+
+/* Get names of active players */
+function getRoomNames() {
+	return rooms.map(room => room.name);
+}
 
 function startTimer() {
 	let timestamp = moment().startOf("day");
@@ -31,62 +61,70 @@ function handlePlayerDisconnect() {
 
 	// Let player know that the opponent left the game
 	if (players[this.id]) {
-		this.broadcast.emit('player-disconnected', players[this.id]);
-	}
+		// this.broadcast.emit('player-disconnected', players[this.id]);
+
 		// Remove player from list of active players
 		delete players[this.id];
 
 		// Emit active players
 		io.emit('active-players', getActivePlayers());
+	}
 }
 
 /* Handle when a player clicks */
 function handleClick(playerData) {
-	let score = 0;
-
-	const reactionTime = ( playerData.timeOfClick - playerData.timeOfImg) / 1000 + " seconds";
+	rounds++;
 
 	const data = {
+		reactionTime: (playerData.timeOfClick - playerData.timeOfImg) / 1000 + " seconds",
+		alias: playerData.playerAlias,
+		score: playerData.score,
+		players: getActivePlayers(),
+	}
+
+	const imgCords = {
 		target: {
 			x: getRandomNumber(400),
 			y: getRandomNumber(400)
 		},
 		delay: getRandomNumber(5000),
-		reactionTime,
-		players: getActivePlayers(),
-		alias: playerData.playerAlias,
-		score: playerData.score,
+	};
+
+	if (rounds < 10) {
+		// Emit event and start timer
+		io.emit('player-click', data, imgCords);
+		startTimer();
+	} else if (rounds === 10) {
+		io.emit('game-over', data);
 	}
+}
 
-	// Emit new image
-	io.emit('player-click', data);
-
-	startTimer();
+function handleGetRoomList(callback) {
+	callback(getRoomNames());
 }
 
 /* Handle new player joining game */
-function handleNewPlayer(playerAlias) {
-	debug("Player '%s' joined the game", playerAlias);
-
+function handleNewPlayer(room, playerAlias) {
 	const activePlayers = getActivePlayers();
+
+	this.join(room);
+
+	const imgCords = {
+		target: {
+			x: getRandomNumber(400),
+			y: getRandomNumber(400)
+		},
+		delay: getRandomNumber(5000),
+	};
 
 	if (activePlayers.length === 0) {
 		players[this.id] = playerAlias;
-		console.log("Waiting for an opponent to join...")
 	} else if (activePlayers.length === 1) {
 		players[this.id] = playerAlias;
 
-		const data = {
-			target: {
-				x: getRandomNumber(400),
-				y: getRandomNumber(400)
-			},
-			delay: getRandomNumber(5000),
-			activePlayers: getActivePlayers(),
-		}
-
 		// Emit active players
-		io.emit('init-game', data);
+		io.in(room).emit('active-players', getActivePlayers());
+		io.in(room).emit('init-game', imgCords);
 	} else {
 		console.log("Too many players...")
 	}
@@ -100,6 +138,7 @@ module.exports = function(socket) {
 	socket.on('disconnect', handlePlayerDisconnect);
 	socket.on('player-click', handleClick);
 	socket.on('add-player', handleNewPlayer);
+	socket.on('get-room-list', handleGetRoomList)
 }
 
 

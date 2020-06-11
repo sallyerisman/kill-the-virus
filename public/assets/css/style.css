@@ -73,7 +73,7 @@ h2 {
 	align-items: center;
 }
 
-#playing-field {
+#playing-field.show {
 	background-image: url("../images/world_map.png");
 	background-size: 90%;
 	background-repeat: no-repeat;
@@ -83,6 +83,10 @@ h2 {
 	border: 1px solid #CDD7E2;
 	border-radius: 3px;
 	position: relative;
+}
+
+#playing-field.hide {
+	display: none;
 }
 
 #timer {
@@ -107,7 +111,8 @@ h2 {
 }
 
 #game-data h3 {
-	background-color: #28A745;
+	color: #28A745;
+	text-align: left;
 	margin-bottom: 0;
 	padding: 0.5rem 0.75rem;
 }
@@ -123,3 +128,26 @@ h2 {
 	font-style: italic;
 }
 
+#game-over.show {
+	color: red;
+	background-image: url("../images/virus.png");
+	background-size: 90%;
+	background-repeat: no-repeat;
+	background-position: center;
+	height: 420px;
+	width: 420px;
+	border: 1px solid #CDD7E2;
+	border-radius: 3px;
+
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+#game-over.show p {
+	font-size: 4em;
+}
+
+#game-over.hide {
+	display: none;
+}

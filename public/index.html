@@ -21,8 +21,13 @@
 			</div>
 
 			<form id="player-form">
-				<div class="form-group">
+				<div class="form-group player-alias">
 					<input type="text" id="player-alias" class="form-control form-control-lg" required placeholder="Enter your alias">
+				</div>
+				<div class="form-group room-name">
+					<select id="room" class="form-control" required placeholder="Loading...">
+						<option selected disabled>Loading rooms...</option>
+					</select>
 				</div>
 				<button type="submit" id="btn-play" class="btn btn-success">Play</button>
 			</form><!-- End of player-form -->
@@ -32,21 +37,28 @@
 		<div id="game-view" class="hide">
 			<div class="gameboard">
 				<h2>Kill the Virus</h2>
-				<div id="playing-field">
+				<div id="game-over" class="hide">
+					<p>GAME OVER</p>
+				</div>
+				<div id="playing-field" class="show">
 					<img id="img-virus-play" src="./assets/images/virus.png" alt="Virus icon">
 				</div><!-- End of playing-field -->
 				<div id="timer"></div>
 			</div> <!-- End of gameboard -->
 
 			<div id="game-data">
-				<h3>Players</h3>
+				<h3>Room:</h3>
+				<ul id="current-room"></ul>
+				<h3>Players:</h3>
 				<ul id="active-players"></ul>
-				<h3>Most recent reaction time</h3>
+				<h3>Most recent reaction time:</h3>
 				<ul id="reaction-times"></ul>
-				<h3>Current score</h3>
+				<h3>Current score:</h3>
 				<ul id="current-score"></ul>
 			</div><!-- End of players -->
 		</div><!-- End of game-view -->
+
+		<div class="game-over show"></div>
 
 	</div><!-- End of app -->
 
