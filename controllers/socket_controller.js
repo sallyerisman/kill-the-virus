@@ -72,15 +72,9 @@ function handlePlayerDisconnect() {
 }
 
 /* Handle when a player clicks */
-function handleClick(playerData) {
+function handleClick(playerAlias) {
+	console.log("Who clicked? ", playerAlias);
 	rounds++;
-
-	const data = {
-		reactionTime: (playerData.timeOfClick - playerData.timeOfImg) / 1000 + " seconds",
-		alias: playerData.playerAlias,
-		score: playerData.score,
-		players: getActivePlayers(),
-	}
 
 	const imgCords = {
 		target: {
@@ -92,10 +86,10 @@ function handleClick(playerData) {
 
 	if (rounds < 10) {
 		// Emit event and start timer
-		io.emit('player-click', data, imgCords);
+		io.emit('player-click', imgCords);
 		startTimer();
 	} else if (rounds === 10) {
-		io.emit('game-over', data);
+		io.emit('game-over');
 	}
 }
 

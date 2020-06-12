@@ -17,6 +17,7 @@ const virus = document.getElementById('img-virus-play');
 
 let room = null;
 let playerAlias = null;
+let reactionTime = "";
 let score = 0;
 
 
@@ -82,29 +83,26 @@ const updateRoomList = (rooms) => {
 	document.querySelector('#room').innerHTML = rooms.map(room => `<option value="${room}">${room}</option>`).join("");
 }
 
-const logReactionTime = (data) => {
+const logReactionTime = () => {
 
 	document.querySelector('#reaction-times').innerHTML = "";
 
 	const reactionEl = document.createElement('li');
 
-	const alias = data.alias;
-	reactionEl.innerHTML = `${alias}: ${data.reactionTime}`;
+	reactionEl.innerHTML = `${playerAlias}: ${reactionTime}`;
 
 	document.querySelector('#reaction-times').appendChild(reactionEl);
 }
 
-const logScore = (data) => {
+const logScore = () => {
 
-	let opponentScore = 0;
+	document.querySelector('#current-score').innerHTML = "";
 
-	if (data.alias !== playerAlias) {
-		opponentScore ++
-		document.querySelector('#current-score').innerHTML = `<li>${data.alias}: ${opponentScore}</li>`;
-		return;
-	}
+	const scoreEl = document.createElement('li');
 
-	document.querySelector('#current-score').innerHTML = `<li>${playerAlias}: ${score}</li>`;
+	scoreEl.innerHTML = `${playerAlias}: ${score}`;
+
+	document.querySelector('#current-score').appendChild(scoreEl);
 }
 
 const showGameOverMessage = (data) => {
@@ -120,15 +118,11 @@ const showGameOverMessage = (data) => {
 // On player click, store data and emit "player-click" event
 virus.addEventListener('click', () => {
 	score ++;
+	const timeOfClick = new Date().getTime();
 
-	const playerData = {
-		timeOfImg,
-		timeOfClick: new Date().getTime(),
-		playerAlias,
-		score,
-	}
+	reactionTime = (timeOfClick - timeOfImg) / 1000 + " seconds";
 
-	socket.emit('player-click', playerData);
+	socket.emit('player-click', playerAlias);
 });
 
 // Get player alias from form and emit "add-player" event to server
@@ -160,9 +154,9 @@ socket.on('init-game', (imgCords) => {
 	initGame(imgCords);
 });
 
-socket.on('player-click', (data, imgCords) => {
-	logScore(data);
-	logReactionTime(data);
+socket.on('player-click', (imgCords) => {
+	logScore();
+	logReactionTime();
 	startRound(imgCords);
 });
 
@@ -174,8 +168,8 @@ socket.on('active-players', (players) => {
 	showActivePlayers(players);
 });
 
-socket.on('game-over', (data) => {
-	showGameOverMessage(data);
+socket.on('game-over', () => {
+	showGameOverMessage();
 });
 
 
