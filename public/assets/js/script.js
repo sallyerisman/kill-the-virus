@@ -93,11 +93,21 @@ const logScore = (players) => {
 	document.querySelector('#current-score').innerHTML = players.map(player => `<li>${player.alias}: ${player.score}</li>`).join("");
 }
 
-const showGameOverMessage = (data) => {
+const showGameOver = (player) => {
+	document.querySelector("#game-over").innerHTML = `
+		<h3>GAME OVER</h3>
+		<p>You lost with a score of ${player.score}/10</p>
+	`
 	document.querySelector("#game-over").classList.remove("hide");
-	document.querySelector("#game-over").classList.add("show");
+	document.querySelector("#playing-field").classList.add("hide");
+}
 
-	document.querySelector("#playing-field").classList.remove("show");
+const showCongratulations = (player) => {
+	document.querySelector("#congratulations").innerHTML = `
+		<h3>Congratulations ${player.alias}!</h3>
+		<p>Your score was ${player.score}/10</p>
+	`
+	document.querySelector("#congratulations").classList.remove("hide");
 	document.querySelector("#playing-field").classList.add("hide");
 }
 
@@ -155,8 +165,14 @@ socket.on('active-players', (players) => {
 	showActivePlayers(players);
 });
 
-socket.on('game-over', () => {
-	showGameOverMessage();
+socket.on('game-over', (player) => {
+	console.log("Loser....")
+	showGameOver(player);
+});
+
+socket.on('congratulations', (player) => {
+	console.log("Winner!!!")
+	showCongratulations(player);
 });
 
 

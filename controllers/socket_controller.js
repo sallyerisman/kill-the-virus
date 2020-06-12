@@ -70,6 +70,17 @@ function handlePlayerDisconnect() {
 	io.emit('active-players', getActivePlayers());
 }
 
+function determineWinner() {
+
+	const winner = players.reduce((max, player) => max.score > player.score ? max : player);
+	const loser = players.reduce((min, player) => min.score < player.score ? min : player);
+
+	// send winner message to winner
+	io.to(winner.playerId).emit('congratulations', winner);
+
+	// send game over message to loser
+	io.to(loser.playerId).emit('game-over', loser);
+}
 
 /* Handle when a player clicks */
 function handleClick(playerAlias, score, reactionTime) {
@@ -95,7 +106,7 @@ function handleClick(playerAlias, score, reactionTime) {
 		io.emit('player-click', imgCords, players);
 		startTimer();
 	} else if (rounds === 10) {
-		io.emit('game-over');
+		determineWinner();
 	}
 }
 
@@ -149,6 +160,4 @@ module.exports = function(socket) {
 	socket.on('add-player', handleNewPlayer);
 	socket.on('get-room-list', handleGetRoomList)
 }
-
-
 
