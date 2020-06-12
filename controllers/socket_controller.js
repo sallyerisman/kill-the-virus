@@ -29,12 +29,15 @@ const rooms = [
 	}
 ];
 
-const players = {};
+// const players = {};
+const players = [];
+let player = {};
 
 
 /* Get names of active players */
 function getActivePlayers() {
-	return Object.values(players);
+	// return Object.values(players);
+	return players.map(player => player.alias);
 }
 
 /* Generic function for getting a random number */
@@ -57,23 +60,26 @@ function startTimer() {
 
 /* Handle player disconnecting */
 function handlePlayerDisconnect() {
-	debug(`Socket ${this.id} left the game :(`);
+	for (let i =0; i < players.length; i++) {
+		if (players[i].playerId === this.id) {
+		players.splice(i,1);
+		break;
+		}
+   	}
 
-	// Let player know that the opponent left the game
-	if (players[this.id]) {
-		// this.broadcast.emit('player-disconnected', players[this.id]);
-
-		// Remove player from list of active players
-		delete players[this.id];
-
-		// Emit active players
-		io.emit('active-players', getActivePlayers());
-	}
+	io.emit('active-players', getActivePlayers());
 }
 
+
 /* Handle when a player clicks */
-function handleClick(playerAlias) {
-	console.log("Who clicked? ", playerAlias);
+function handleClick(playerAlias, score, reactionTime) {
+
+	const playerIndex = players.findIndex((player => player.playerId === this.id));
+
+	players[playerIndex].alias = playerAlias;
+	players[playerIndex].score = score;
+	players[playerIndex].reactionTime = reactionTime;
+
 	rounds++;
 
 	const imgCords = {
@@ -86,7 +92,7 @@ function handleClick(playerAlias) {
 
 	if (rounds < 10) {
 		// Emit event and start timer
-		io.emit('player-click', imgCords);
+		io.emit('player-click', imgCords, players);
 		startTimer();
 	} else if (rounds === 10) {
 		io.emit('game-over');
@@ -111,10 +117,19 @@ function handleNewPlayer(room, playerAlias) {
 		delay: getRandomNumber(5000),
 	};
 
+	player = {
+		playerId: this.id,
+		alias: playerAlias,
+		score: 0,
+		reactionTime: "",
+	}
+
 	if (activePlayers.length === 0) {
-		players[this.id] = playerAlias;
+		// players[this.id] = playerAlias;
+		players.push(player)
 	} else if (activePlayers.length === 1) {
-		players[this.id] = playerAlias;
+		// players[this.id] = playerAlias;
+		players.push(player)
 
 		// Emit active players
 		io.in(room).emit('active-players', getActivePlayers());

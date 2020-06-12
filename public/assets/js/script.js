@@ -83,26 +83,14 @@ const updateRoomList = (rooms) => {
 	document.querySelector('#room').innerHTML = rooms.map(room => `<option value="${room}">${room}</option>`).join("");
 }
 
-const logReactionTime = () => {
-
+const logReactionTime = (players) => {
 	document.querySelector('#reaction-times').innerHTML = "";
-
-	const reactionEl = document.createElement('li');
-
-	reactionEl.innerHTML = `${playerAlias}: ${reactionTime}`;
-
-	document.querySelector('#reaction-times').appendChild(reactionEl);
+	document.querySelector('#reaction-times').innerHTML = players.map(player => `<li>${player.alias}: ${player.reactionTime}</li>`).join("");
 }
 
-const logScore = () => {
-
+const logScore = (players) => {
 	document.querySelector('#current-score').innerHTML = "";
-
-	const scoreEl = document.createElement('li');
-
-	scoreEl.innerHTML = `${playerAlias}: ${score}`;
-
-	document.querySelector('#current-score').appendChild(scoreEl);
+	document.querySelector('#current-score').innerHTML = players.map(player => `<li>${player.alias}: ${player.score}</li>`).join("");
 }
 
 const showGameOverMessage = (data) => {
@@ -119,10 +107,9 @@ const showGameOverMessage = (data) => {
 virus.addEventListener('click', () => {
 	score ++;
 	const timeOfClick = new Date().getTime();
-
 	reactionTime = (timeOfClick - timeOfImg) / 1000 + " seconds";
 
-	socket.emit('player-click', playerAlias);
+	socket.emit('player-click', playerAlias, score, reactionTime);
 });
 
 // Get player alias from form and emit "add-player" event to server
@@ -154,9 +141,9 @@ socket.on('init-game', (imgCords) => {
 	initGame(imgCords);
 });
 
-socket.on('player-click', (imgCords) => {
-	logScore();
-	logReactionTime();
+socket.on('player-click', (imgCords, players) => {
+	logScore(players);
+	logReactionTime(players);
 	startRound(imgCords);
 });
 
