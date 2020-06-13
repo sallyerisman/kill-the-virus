@@ -3,8 +3,12 @@
 const debug = require('debug')('kill-the-virus:socket_controller');
 
 let io = null;
+
 let rounds = 0;
-const maxRounds = 10;
+const maxRounds = 3;
+
+const players = [];
+let player = {};
 
 const rooms = [
 	{
@@ -29,8 +33,7 @@ const rooms = [
 	}
 ];
 
-const players = [];
-let player = {};
+
 
 /* Determine the winner/loser and emit individual messages to both players */
 function determineWinner() {
@@ -43,7 +46,6 @@ function determineWinner() {
 
 /* Get names of active players */
 function getActivePlayers() {
-	// return Object.values(players);
 	return players.map(player => player.alias);
 }
 
@@ -52,7 +54,7 @@ function getRandomNumber(range) {
 	return Math.floor(Math.random() * range)
 };
 
-/* Get names of active players */
+/* Get names of all rooms */
 function getRoomNames() {
 	return rooms.map(room => room.name);
 }
@@ -64,6 +66,10 @@ function getRoomNames() {
 
 /* Handle when a player clicks a virus */
 function handleClick(playerAlias, score, reactionTime) {
+	console.log("playerAlias: ", playerAlias);
+	console.log("score: ", score);
+	console.log("reactionTime: ", reactionTime)
+
 	rounds++;
 
 	io.emit('reset-timer');

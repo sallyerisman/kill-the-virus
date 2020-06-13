@@ -136,8 +136,9 @@ h2 {
 	background-position: center;
 	height: 420px;
 	width: 420px;
-	border: 1px solid #CDD7E2;
+	/* border: 1px solid #CDD7E2;
 	border-radius: 3px;
+	padding: 1rem; */
 
 	display: flex;
 	flex-direction: column;
@@ -148,11 +149,13 @@ h2 {
 #game-over h3 {
 	color: red;
 	font-size: 2em;
+	font-weight: bold;
 }
 
 #game-over p {
 	color: red;
-	font-size: 1.5em;
+	font-size: 1.2em;
+	font-weight: bold;
 }
 
 #game-over.hide {
@@ -161,17 +164,16 @@ h2 {
 
 #congratulations {
 	background-image: url("../images/kill-virus.png");
-	background-size: 90%;
+	background-size: 75%;
 	background-repeat: no-repeat;
 	background-position: center;
 	height: 420px;
 	width: 420px;
-	border: 1px solid #CDD7E2;
-	border-radius: 3px;
+	/* border: 1px solid #CDD7E2;
+	border-radius: 3px; */
 
 	display: flex;
 	flex-direction: column;
-	justify-content: center;
 	align-items: center;
 }
 
@@ -182,7 +184,7 @@ h2 {
 
 #congratulations p {
 	color: red;
-	font-size: 1.5em;
+	font-size: 1.2em;
 }
 
 #congratulations.hide {

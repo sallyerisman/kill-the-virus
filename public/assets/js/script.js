@@ -14,8 +14,8 @@ const roundsPlayed = document.querySelector('#rounds-played');
 const timer = document.querySelector('#timer');
 const virus = document.getElementById('img-virus-play');
 
-const playerAlias = document.querySelector('#player-alias').value;
 let currTime = null;
+let playerAlias = null;
 let reactionTime = "";
 let room = null;
 let score = 0;
@@ -39,25 +39,14 @@ const infoFromAdmin = (data) => {
 	activePlayers.appendChild(notification);
 }
 
-/* Start a new game */
-const initGame = (imgCords) => {
-	document.querySelector('#start').classList.add('hide');
-	document.querySelector('#game-view').classList.remove('hide');
-
-	showRoomName(room);
-	startRound(imgCords);
-}
-
 const getRoomList = () => {
 	socket.emit('get-room-list', (rooms) => {
 		updateRoomList(rooms)
 	})
 }
 
-/* Empty timer field */
-const resetTimer = () => {
-	clearInterval(currTime);
-	timer.innerHTML = "";
+const updateRoomList = (rooms) => {
+	document.querySelector('#room').innerHTML = rooms.map(room => `<option value="${room}">${room}</option>`).join("");
 }
 
 /* Show all player in the current game */
@@ -117,6 +106,12 @@ const showScore = (players) => {
 	currentScore.innerHTML = players.map(player => `<li>${player.alias}: ${player.score}</li>`).join("");
 }
 
+/* Empty timer field */
+const resetTimer = () => {
+	clearInterval(currTime);
+	timer.innerHTML = "";
+}
+
 /* Show timer */
 const showTimer = (timeOfImg) => {
 	let mins = 0;
@@ -160,23 +155,20 @@ const startRound = (imgCords) => {
 	}, imgCords.delay);
 }
 
+/* Start a new game */
+const initGame = (imgCords) => {
+	document.querySelector('#start').classList.add('hide');
+	document.querySelector('#game-view').classList.remove('hide');
 
-const updateRoomList = (rooms) => {
-	document.querySelector('#room').innerHTML = rooms.map(room => `<option value="${room}">${room}</option>`).join("");
+	showRoomName(room);
+	startRound(imgCords);
 }
+
 
 
 /*
 * Event handlers
 */
-
-/* When player clicks on virus, send player data and emit "player-click" event */
-virus.addEventListener('click', () => {
-	score ++;
-	reactionTime = reactionTime / 1000 + " seconds";
-
-	socket.emit('player-click', playerAlias, score, reactionTime);
-});
 
 /* When someone submits their alias, emit "add-player" event to server */
 playerForm.addEventListener('submit', e => {
@@ -185,6 +177,15 @@ playerForm.addEventListener('submit', e => {
 	room = playerForm.room.value;
 
 	socket.emit('add-player', room, playerAlias);
+});
+
+/* When player clicks on virus, send player data and emit "player-click" event */
+virus.addEventListener('click', () => {
+	score ++;
+	reactionTime = reactionTime / 1000 + " seconds";
+	playerAlias = document.querySelector('#player-alias').value;
+
+	socket.emit('player-click', playerAlias, score, reactionTime);
 });
 
 
