@@ -15,7 +15,7 @@ const timer = document.querySelector('#timer');
 const virus = document.getElementById('img-virus-play');
 
 let currTime = null;
-let playerAlias = null;
+let playerAlias = "";
 let reactionTime = "";
 let room = null;
 let score = 0;
@@ -174,6 +174,7 @@ const initGame = (imgCords) => {
 playerForm.addEventListener('submit', e => {
 	e.preventDefault();
 
+	playerAlias = document.querySelector('#player-alias').value;
 	room = playerForm.room.value;
 
 	socket.emit('add-player', room, playerAlias);
@@ -183,9 +184,14 @@ playerForm.addEventListener('submit', e => {
 virus.addEventListener('click', () => {
 	score ++;
 	reactionTime = reactionTime / 1000 + " seconds";
-	playerAlias = document.querySelector('#player-alias').value;
 
-	socket.emit('player-click', playerAlias, score, reactionTime);
+	const playerData = {
+		playerAlias,
+		score,
+		reactionTime,
+	}
+
+	socket.emit('player-click', playerData);
 });
 
 
@@ -197,8 +203,12 @@ socket.on('active-players', (players) => {
 	showActivePlayers(players);
 });
 
-socket.on('congratulations', (player, maxRounds) => {
-	showCongratulations(player, maxRounds);
+socket.on('remaining-players', (players) => {
+	showActivePlayers(players);
+});
+
+socket.on('congratulations', (winner, maxRounds) => {
+	showCongratulations(winner, maxRounds);
 });
 
 socket.on('game-over', (player, maxRounds) => {
@@ -209,10 +219,10 @@ socket.on('init-game', (imgCords) => {
 	initGame(imgCords);
 });
 
-socket.on('new-round', (imgCords, players, round, maxRounds) => {
-	showScore(players);
-	showReactionTime(players);
-	showRound(round, maxRounds)
+socket.on('player-click', (imgCords, gameData) => {
+	showScore(gameData.players);
+	showReactionTime(gameData.players);
+	showRound(gameData.rounds, gameData.maxRounds)
 	startRound(imgCords);
 });
 
