@@ -1,6 +1,7 @@
 /* SERVER-SIDE SCRIPT */
 
 const debug = require('debug')('kill-the-virus:socket_controller');
+const moment = require('moment');
 
 let io = null;
 let rounds = 0;
@@ -29,17 +30,10 @@ const rooms = [
 	}
 ];
 
+// const players = {};
 const players = [];
 let player = {};
 
-/* Determine the winner/loser and emit individual messages to both players */
-function determineWinner() {
-	const winner = players.reduce((max, player) => max.score > player.score ? max : player);
-	const loser = players.reduce((min, player) => min.score < player.score ? min : player);
-
-	io.to(winner.playerId).emit('congratulations', winner, maxRounds);
-	io.to(loser.playerId).emit('game-over', loser, maxRounds);
-}
 
 /* Get names of active players */
 function getActivePlayers() {
@@ -57,21 +51,42 @@ function getRoomNames() {
 	return rooms.map(room => room.name);
 }
 
+/* Handle player disconnecting */
+function handlePlayerDisconnect() {
+	for (let i =0; i < players.length; i++) {
+		if (players[i].playerId === this.id) {
+		players.splice(i,1);
+		break;
+		}
+   	}
 
-/*
-* Functions for handling client events
-*/
+	io.emit('active-players', getActivePlayers());
+}
 
-/* Handle when a player clicks a virus */
+function determineWinner() {
+
+	const winner = players.reduce((max, player) => max.score > player.score ? max : player);
+	const loser = players.reduce((min, player) => min.score < player.score ? min : player);
+
+	// send winner message to winner
+	io.to(winner.playerId).emit('congratulations', winner, maxRounds);
+
+	// send game over message to loser
+	io.to(loser.playerId).emit('game-over', loser, maxRounds);
+}
+
+/* Handle when a player clicks */
 function handleClick(playerAlias, score, reactionTime) {
-	rounds++;
 
 	io.emit('reset-timer');
 
 	const playerIndex = players.findIndex((player => player.playerId === this.id));
+
 	players[playerIndex].alias = playerAlias;
 	players[playerIndex].score = score;
 	players[playerIndex].reactionTime = reactionTime;
+
+	rounds++;
 
 	const imgCords = {
 		target: {
@@ -82,14 +97,12 @@ function handleClick(playerAlias, score, reactionTime) {
 	};
 
 	if (rounds < maxRounds) {
-		// Emit event to start new round
-		io.emit('new-round', imgCords, players, rounds, maxRounds);
+		io.emit('player-click', imgCords, players);
 	} else if (rounds === maxRounds) {
 		determineWinner();
 	}
 }
 
-/* Get a list of all rooms */
 function handleGetRoomList(callback) {
 	callback(getRoomNames());
 }
@@ -116,11 +129,13 @@ function handleNewPlayer(room, playerAlias) {
 	}
 
 	if (activePlayers.length === 0) {
+		// players[this.id] = playerAlias;
 		players.push(player)
 	} else if (activePlayers.length === 1) {
+		// players[this.id] = playerAlias;
 		players.push(player)
 
-		// Emit active players and event to start new game
+		// Emit active players
 		io.in(room).emit('active-players', getActivePlayers());
 		io.in(room).emit('init-game', imgCords);
 	} else {
@@ -128,26 +143,14 @@ function handleNewPlayer(room, playerAlias) {
 	}
 }
 
-/* Handle player disconnecting */
-function handlePlayerDisconnect() {
-	for (let i =0; i < players.length; i++) {
-		if (players[i].playerId === this.id) {
-		players.splice(i,1);
-		break;
-		}
-   	}
-
-	io.emit('active-players', getActivePlayers());
-}
-
 module.exports = function(socket) {
 	debug(`Client ${socket.id} connected!`);
 
 	io = this;
 
-	socket.on('add-player', handleNewPlayer);
 	socket.on('disconnect', handlePlayerDisconnect);
-	socket.on('get-room-list', handleGetRoomList)
 	socket.on('player-click', handleClick);
+	socket.on('add-player', handleNewPlayer);
+	socket.on('get-room-list', handleGetRoomList)
 }
 

@@ -2,150 +2,71 @@
 
 const socket = io();
 
-const activePlayers = document.querySelector('#active-players');
-const congratulations = document.querySelector('#congratulations');
-const currentRoom = document.querySelector('#current-room');
-const currentScore = document.querySelector('#current-score');
-const gameOver = document.querySelector('#game-over');
+const start = document.querySelector('#start');
 const playerForm = document.querySelector('#player-form');
+
+const gameView = document.querySelector('#game-view');
 const playingField = document.querySelector('#playing-field');
-const reactionTimes = document.querySelector('#reaction-times');
-const roundsPlayed = document.querySelector('#rounds-played');
+
 const timer = document.querySelector('#timer');
+
+const gameData = document.querySelector('#game-data');
+const activePlayers = document.querySelector('#active-players');
+
 const virus = document.getElementById('img-virus-play');
 
-const playerAlias = document.querySelector('#player-alias').value;
-let currTime = null;
-let reactionTime = "";
 let room = null;
+let playerAlias = null;
+let reactionTime = "";
 let score = 0;
 let timeOfImg = null;
+let currTime = null;
 
-
-/* Show virus in new location */
-const imgCoordinates = (target) => {
-	virus.style.display = "inline";
-	virus.style.left = target.x + "px";
-	virus.style.top = target.y + "px";
-}
 
 /* Log player connect/disconnect events */
 const infoFromAdmin = (data) => {
 	const notification = document.createElement('li');
-
 	notification.classList.add('list-group-item', 'list-group-item-light', 'notification');
+
 	notification.innerHTML = data;
 
 	activePlayers.appendChild(notification);
 }
 
-/* Start a new game */
-const initGame = (imgCords) => {
-	document.querySelector('#start').classList.add('hide');
-	document.querySelector('#game-view').classList.remove('hide');
-
-	showRoomName(room);
-	startRound(imgCords);
-}
-
-const getRoomList = () => {
-	socket.emit('get-room-list', (rooms) => {
-		updateRoomList(rooms)
-	})
-}
-
-/* Empty timer field */
-const resetTimer = () => {
-	clearInterval(currTime);
-	timer.innerHTML = "";
-}
-
-/* Show all player in the current game */
 const showActivePlayers = (players) => {
 	activePlayers.innerHTML = players.map(player => `<li class="player">${player}</li>`).join("");
 }
 
-/* Send congratulations message to the winner */
-const showCongratulations = (player, maxRounds) => {
-	congratulations.innerHTML = `
-		<h3>Congratulations ${player.alias}!</h3>
-		<p>Your score was ${player.score}/${maxRounds}</p>
-	`
-	congratulations.classList.remove("hide");
-	playingField.classList.add("hide");
-}
-
-/* Send game over message to the loser */
-const showGameOver = (player, maxRounds) => {
-	gameOver.innerHTML = `
-		<h3>GAME OVER</h3>
-		<p>You lost with a score of ${player.score}/${maxRounds}</p>
-	`
-	gameOver.classList.remove("hide");
-	playingField.classList.add("hide");
-}
-
-/* Show the most recent winning reaction time of both players */
-const showReactionTime = (players) => {
-	reactionTimes.innerHTML = "";
-	reactionTimes.innerHTML = players.map(player => `<li>${player.alias}: ${player.reactionTime}</li>`).join("");
-}
-
-/* Show name of current room */
 const showRoomName = (roomEl) => {
-	currentRoom.innerHTML = "";
+	document.querySelector('#current-room').innerHTML = "";
 
 	const roomName = document.createElement('li');
-	roomName.innerHTML = `${roomEl}`;
+	const name = roomEl;
+	roomName.innerHTML = `${name}`;
 
-	currentRoom.appendChild(roomName);
+	document.querySelector('#current-room').appendChild(roomName);
 }
 
-/* Show number of rounds played */
-const showRound = (round, maxRounds) => {
-	roundsPlayed.innerHTML = "";
-
-	const roundEl = document.createElement('li');
-	roundEl.innerHTML = `${round}/${maxRounds}`;
-
-	roundsPlayed.appendChild(roundEl);
-}
-
-/* Show current score of both players */
-const showScore = (players) => {
-	currentScore.innerHTML = "";
-	currentScore.innerHTML = players.map(player => `<li>${player.alias}: ${player.score}</li>`).join("");
-}
-
-/* Show timer */
-const showTimer = (timeOfImg) => {
+function showTimer(timeOfImg) {
 	let mins = 0;
 	let secs = 0;
 	let cents = 0;
 
 	currTime = setInterval(() => {
-		reactionTime = Date.now() - timeOfImg;
-		mins = Math.floor((reactionTime/1000/60)),
-		secs = Math.floor((reactionTime/1000));
-		cents = Math.floor((reactionTime/100));
-
-		if (mins < 10){
-			mins = "0" + mins;
-		}
-
-		if (secs < 10){
-			secs = "0" + secs;
-		}
-
-		if (cents < 10){
-			cents = "0" + cents;
-		}
+		const time = Date.now() - timeOfImg;
+		mins = Math.floor((time/1000/60)),
+		secs = Math.floor((time/1000));
+		cents = Math.floor((time/100));
 
 		timer.innerHTML = mins + ":" + secs + ":" + cents;
 	}, 10);
 }
 
-/* Start new round */
+function resetTimer() {
+	clearInterval(currTime);
+	timer.innerHTML = "";
+}
+
 const startRound = (imgCords) => {
 	virus.style.display = "none";
 
@@ -160,64 +81,82 @@ const startRound = (imgCords) => {
 	}, imgCords.delay);
 }
 
+const imgCoordinates = (target) => {
+	virus.style.display = "inline";
+	virus.style.left = target.x + "px";
+	virus.style.top = target.y + "px";
+}
+
+const initGame = (imgCords) => {
+	start.classList.add('hide');
+	gameView.classList.remove('hide');
+
+	showRoomName(room);
+
+	startRound(imgCords);
+}
+
+const getRoomList = () => {
+	socket.emit('get-room-list', (rooms) => {
+		updateRoomList(rooms)
+	})
+}
 
 const updateRoomList = (rooms) => {
 	document.querySelector('#room').innerHTML = rooms.map(room => `<option value="${room}">${room}</option>`).join("");
 }
 
+const logReactionTime = (players) => {
+	document.querySelector('#reaction-times').innerHTML = "";
+	document.querySelector('#reaction-times').innerHTML = players.map(player => `<li>${player.alias}: ${player.reactionTime}</li>`).join("");
+}
 
-/*
-* Event handlers
-*/
+const logScore = (players) => {
+	document.querySelector('#current-score').innerHTML = "";
+	document.querySelector('#current-score').innerHTML = players.map(player => `<li>${player.alias}: ${player.score}</li>`).join("");
+}
 
-/* When player clicks on virus, send player data and emit "player-click" event */
+const showGameOver = (player, maxRounds) => {
+	document.querySelector("#game-over").innerHTML = `
+		<h3>GAME OVER</h3>
+		<p>You lost with a score of ${player.score}/${maxRounds}</p>
+	`
+	document.querySelector("#game-over").classList.remove("hide");
+	document.querySelector("#playing-field").classList.add("hide");
+}
+
+const showCongratulations = (player, maxRounds) => {
+	document.querySelector("#congratulations").innerHTML = `
+		<h3>Congratulations ${player.alias}!</h3>
+		<p>Your score was ${player.score}/${maxRounds}</p>
+	`
+	document.querySelector("#congratulations").classList.remove("hide");
+	document.querySelector("#playing-field").classList.add("hide");
+}
+
+/* Event handlers */
+
+// On player click, store data and emit "player-click" event
 virus.addEventListener('click', () => {
 	score ++;
-	reactionTime = reactionTime / 1000 + " seconds";
+	const timeOfClick = new Date().getTime();
+	reactionTime = (timeOfClick - timeOfImg) / 1000 + " seconds";
 
 	socket.emit('player-click', playerAlias, score, reactionTime);
 });
 
-/* When someone submits their alias, emit "add-player" event to server */
+// Get player alias from form and emit "add-player" event to server
 playerForm.addEventListener('submit', e => {
 	e.preventDefault();
 
+	playerAlias = document.querySelector('#player-alias').value;
 	room = playerForm.room.value;
 
 	socket.emit('add-player', room, playerAlias);
 });
 
 
-/*
-* Listening for events emitted from server
-*/
-
-socket.on('active-players', (players) => {
-	showActivePlayers(players);
-});
-
-socket.on('congratulations', (player, maxRounds) => {
-	showCongratulations(player, maxRounds);
-});
-
-socket.on('game-over', (player, maxRounds) => {
-	showGameOver(player, maxRounds);
-});
-
-socket.on('init-game', (imgCords) => {
-	initGame(imgCords);
-});
-
-socket.on('new-round', (imgCords, players, round, maxRounds) => {
-	showScore(players);
-	showReactionTime(players);
-	showRound(round, maxRounds)
-	startRound(imgCords);
-});
-
-socket.on('player-disconnected', playerAlias => {
-	infoFromAdmin(`${playerAlias} left the game`);
-});
+/* Listening for events emitted from server */
 
 socket.on('reconnect', () => {
 	if (playerAlias) {
@@ -227,14 +166,37 @@ socket.on('reconnect', () => {
 	}
 });
 
+socket.on('player-disconnected', playerAlias => {
+	infoFromAdmin(`${playerAlias} left the game`);
+});
+
+socket.on('init-game', (imgCords) => {
+	initGame(imgCords);
+});
+
+socket.on('player-click', (imgCords, players) => {
+	logScore(players);
+	logReactionTime(players);
+	startRound(imgCords);
+});
+
 socket.on('reset-timer', () => {
 	resetTimer();
 });
 
+socket.on('active-players', (players) => {
+	showActivePlayers(players);
+});
 
-/*
-* Functions to run directly on page load
-*/
+socket.on('game-over', (player, maxRounds) => {
+	showGameOver(player, maxRounds);
+});
+
+socket.on('congratulations', (player, maxRounds) => {
+	showCongratulations(player, maxRounds);
+});
+
+
 window.onload = () => {
 	getRoomList();
 }

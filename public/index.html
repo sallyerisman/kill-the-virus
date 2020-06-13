@@ -25,12 +25,13 @@
 					<input type="text" id="player-alias" class="form-control form-control-lg" required placeholder="Enter your alias">
 				</div>
 				<div class="form-group room-name">
-					<select id="room" class="form-control" placeholder="Loading...">
+					<select id="room" class="form-control" required placeholder="Loading...">
 						<option selected disabled>Loading rooms...</option>
 					</select>
 				</div>
-				<button type="submit" class="btn btn-success">Play</button>
+				<button type="submit" id="btn-play" class="btn btn-success">Play</button>
 			</form><!-- End of player-form -->
+
 		</div><!-- End of start container -->
 
 		<div id="game-view" class="hide">
@@ -44,18 +45,16 @@
 				<div id="timer"></div>
 			</div> <!-- End of gameboard -->
 
-			<div class="game-data">
+			<div id="game-data">
 				<h3>Room:</h3>
 				<ul id="current-room"></ul>
 				<h3>Players:</h3>
 				<ul id="active-players"></ul>
-				<h3>Rounds played:</h3>
-				<ul id="rounds-played"></ul>
 				<h3>Last winning reaction time:</h3>
 				<ul id="reaction-times"></ul>
 				<h3>Current scores:</h3>
 				<ul id="current-score"></ul>
-			</div><!-- End of game-data -->
+			</div><!-- End of players -->
 		</div><!-- End of game-view -->
 
 	</div><!-- End of app -->
