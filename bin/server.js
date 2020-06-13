@@ -11,8 +11,6 @@ const debug = require('debug')('kill-the-virus:server');
 const http = require('http');
 const SocketIO = require('socket.io');
 
-const moment = require('moment');
-
 /**
  * Get port from environment and store in Express.
  */

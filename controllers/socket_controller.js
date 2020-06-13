@@ -1,11 +1,12 @@
 /* SERVER-SIDE SCRIPT */
 
 const debug = require('debug')('kill-the-virus:socket_controller');
-const moment = require('moment');
 
 let io = null;
 let rounds = 0;
-const maxRounds = 10;
+const maxRounds = 3;
+const players = [];
+let player = {};
 
 const rooms = [
 	{
@@ -30,14 +31,11 @@ const rooms = [
 	}
 ];
 
-// const players = {};
-const players = [];
-let player = {};
+
 
 
 /* Get names of active players */
 function getActivePlayers() {
-	// return Object.values(players);
 	return players.map(player => player.alias);
 }
 
@@ -46,7 +44,7 @@ function getRandomNumber(range) {
 	return Math.floor(Math.random() * range)
 };
 
-/* Get names of active players */
+/* Get names of rooms */
 function getRoomNames() {
 	return rooms.map(room => room.name);
 }
@@ -63,30 +61,27 @@ function handlePlayerDisconnect() {
 	io.emit('active-players', getActivePlayers());
 }
 
+/* Determine the winner/loser and emit personalized messages */
 function determineWinner() {
 
 	const winner = players.reduce((max, player) => max.score > player.score ? max : player);
 	const loser = players.reduce((min, player) => min.score < player.score ? min : player);
 
-	// send winner message to winner
 	io.to(winner.playerId).emit('congratulations', winner, maxRounds);
 
-	// send game over message to loser
 	io.to(loser.playerId).emit('game-over', loser, maxRounds);
 }
 
-/* Handle when a player clicks */
+/* Handle when a player clicks a virus */
 function handleClick(playerAlias, score, reactionTime) {
+	rounds++;
 
 	io.emit('reset-timer');
 
 	const playerIndex = players.findIndex((player => player.playerId === this.id));
-
 	players[playerIndex].alias = playerAlias;
 	players[playerIndex].score = score;
 	players[playerIndex].reactionTime = reactionTime;
-
-	rounds++;
 
 	const imgCords = {
 		target: {
@@ -97,12 +92,13 @@ function handleClick(playerAlias, score, reactionTime) {
 	};
 
 	if (rounds < maxRounds) {
-		io.emit('player-click', imgCords, players);
+		io.emit('player-click', imgCords, players, rounds, maxRounds);
 	} else if (rounds === maxRounds) {
 		determineWinner();
 	}
 }
 
+/* Get a list of all rooms */
 function handleGetRoomList(callback) {
 	callback(getRoomNames());
 }
@@ -129,13 +125,11 @@ function handleNewPlayer(room, playerAlias) {
 	}
 
 	if (activePlayers.length === 0) {
-		// players[this.id] = playerAlias;
 		players.push(player)
 	} else if (activePlayers.length === 1) {
-		// players[this.id] = playerAlias;
 		players.push(player)
 
-		// Emit active players
+		// Emit active players and event to start new game
 		io.in(room).emit('active-players', getActivePlayers());
 		io.in(room).emit('init-game', imgCords);
 	} else {
