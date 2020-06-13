@@ -19,6 +19,8 @@ let room = null;
 let playerAlias = null;
 let reactionTime = "";
 let score = 0;
+let timeOfImg = null;
+let currTime = null;
 
 
 /* Log player connect/disconnect events */
@@ -45,16 +47,37 @@ const showRoomName = (roomEl) => {
 	document.querySelector('#current-room').appendChild(roomName);
 }
 
-const startTimer = (timestamp) => {
-	timer.innerHTML = timestamp;
+function showTimer(timeOfImg) {
+	let mins = 0;
+	let secs = 0;
+	let cents = 0;
+
+	currTime = setInterval(() => {
+		const time = Date.now() - timeOfImg;
+		mins = Math.floor((time/1000/60)),
+		secs = Math.floor((time/1000));
+		cents = Math.floor((time/100));
+
+		timer.innerHTML = mins + ":" + secs + ":" + cents;
+	}, 10);
 }
-let timeOfImg = null;
+
+function resetTimer() {
+	clearInterval(currTime);
+	timer.innerHTML = "";
+}
 
 const startRound = (imgCords) => {
 	virus.style.display = "none";
+
+	if (currTime) {
+		resetTimer();
+	}
+
 	setTimeout(() => {
 		imgCoordinates(imgCords.target);
-		timeOfImg = new Date().getTime();
+		timeOfImg = Date.now();
+		showTimer(timeOfImg);
 	}, imgCords.delay);
 }
 
@@ -93,19 +116,19 @@ const logScore = (players) => {
 	document.querySelector('#current-score').innerHTML = players.map(player => `<li>${player.alias}: ${player.score}</li>`).join("");
 }
 
-const showGameOver = (player) => {
+const showGameOver = (player, maxRounds) => {
 	document.querySelector("#game-over").innerHTML = `
 		<h3>GAME OVER</h3>
-		<p>You lost with a score of ${player.score}/10</p>
+		<p>You lost with a score of ${player.score}/${maxRounds}</p>
 	`
 	document.querySelector("#game-over").classList.remove("hide");
 	document.querySelector("#playing-field").classList.add("hide");
 }
 
-const showCongratulations = (player) => {
+const showCongratulations = (player, maxRounds) => {
 	document.querySelector("#congratulations").innerHTML = `
 		<h3>Congratulations ${player.alias}!</h3>
-		<p>Your score was ${player.score}/10</p>
+		<p>Your score was ${player.score}/${maxRounds}</p>
 	`
 	document.querySelector("#congratulations").classList.remove("hide");
 	document.querySelector("#playing-field").classList.add("hide");
@@ -157,22 +180,20 @@ socket.on('player-click', (imgCords, players) => {
 	startRound(imgCords);
 });
 
-socket.on('start-timer', timestamp => {
-	startTimer(timestamp);
+socket.on('reset-timer', () => {
+	resetTimer();
 });
 
 socket.on('active-players', (players) => {
 	showActivePlayers(players);
 });
 
-socket.on('game-over', (player) => {
-	console.log("Loser....")
-	showGameOver(player);
+socket.on('game-over', (player, maxRounds) => {
+	showGameOver(player, maxRounds);
 });
 
-socket.on('congratulations', (player) => {
-	console.log("Winner!!!")
-	showCongratulations(player);
+socket.on('congratulations', (player, maxRounds) => {
+	showCongratulations(player, maxRounds);
 });
 
 

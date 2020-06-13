@@ -5,6 +5,7 @@ const moment = require('moment');
 
 let io = null;
 let rounds = 0;
+const maxRounds = 10;
 
 const rooms = [
 	{
@@ -50,14 +51,6 @@ function getRoomNames() {
 	return rooms.map(room => room.name);
 }
 
-function startTimer() {
-	let timestamp = moment().startOf("day");
-	setInterval(function () {
-		timestamp.add(1, 'second');
-		io.emit('start-timer', timestamp.format('HH:mm:ss'));
-	}, 1000);
-}
-
 /* Handle player disconnecting */
 function handlePlayerDisconnect() {
 	for (let i =0; i < players.length; i++) {
@@ -76,14 +69,16 @@ function determineWinner() {
 	const loser = players.reduce((min, player) => min.score < player.score ? min : player);
 
 	// send winner message to winner
-	io.to(winner.playerId).emit('congratulations', winner);
+	io.to(winner.playerId).emit('congratulations', winner, maxRounds);
 
 	// send game over message to loser
-	io.to(loser.playerId).emit('game-over', loser);
+	io.to(loser.playerId).emit('game-over', loser, maxRounds);
 }
 
 /* Handle when a player clicks */
 function handleClick(playerAlias, score, reactionTime) {
+
+	io.emit('reset-timer');
 
 	const playerIndex = players.findIndex((player => player.playerId === this.id));
 
@@ -101,11 +96,9 @@ function handleClick(playerAlias, score, reactionTime) {
 		delay: getRandomNumber(5000),
 	};
 
-	if (rounds < 10) {
-		// Emit event and start timer
+	if (rounds < maxRounds) {
 		io.emit('player-click', imgCords, players);
-		startTimer();
-	} else if (rounds === 10) {
+	} else if (rounds === maxRounds) {
 		determineWinner();
 	}
 }
