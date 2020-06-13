@@ -14,6 +14,12 @@ const roundsPlayed = document.querySelector('#rounds-played');
 const timer = document.querySelector('#timer');
 const virus = document.getElementById('img-virus-play');
 
+<<<<<<< HEAD
+=======
+let currTime = null;
+let playerAlias = "";
+let reactionTime = "";
+>>>>>>> dev
 let room = null;
 let playerAlias = null;
 let reactionTime = "";
@@ -31,7 +37,21 @@ const infoFromAdmin = (data) => {
 	activePlayers.appendChild(notification);
 }
 
+<<<<<<< HEAD
 /* Show all players in current game */
+=======
+const getRoomList = () => {
+	socket.emit('get-room-list', (rooms) => {
+		updateRoomList(rooms)
+	})
+}
+
+const updateRoomList = (rooms) => {
+	document.querySelector('#room').innerHTML = rooms.map(room => `<option value="${room}">${room}</option>`).join("");
+}
+
+/* Show all player in the current game */
+>>>>>>> dev
 const showActivePlayers = (players) => {
 	activePlayers.innerHTML = players.map(player => `<li class="player">${player}</li>`).join("");
 }
@@ -46,6 +66,31 @@ const showRoomName = (roomEl) => {
 	currentRoom.appendChild(roomName);
 }
 
+<<<<<<< HEAD
+=======
+/* Show number of rounds played */
+const showRound = (round, maxRounds) => {
+	roundsPlayed.innerHTML = "";
+
+	const roundEl = document.createElement('li');
+	roundEl.innerHTML = `${round}/${maxRounds}`;
+
+	roundsPlayed.appendChild(roundEl);
+}
+
+/* Show current score of both players */
+const showScore = (players) => {
+	currentScore.innerHTML = "";
+	currentScore.innerHTML = players.map(player => `<li>${player.alias}: ${player.score}</li>`).join("");
+}
+
+/* Empty timer field */
+const resetTimer = () => {
+	clearInterval(currTime);
+	timer.innerHTML = "";
+}
+
+>>>>>>> dev
 /* Show timer */
 function showTimer(timeOfImg) {
 	let mins = 0;
@@ -95,6 +140,7 @@ const startRound = (imgCords) => {
 	}, imgCords.delay);
 }
 
+<<<<<<< HEAD
 /* Show virus in new location */
 const imgCoordinates = (target) => {
 	virus.style.display = "inline";
@@ -121,6 +167,15 @@ const getRoomList = () => {
 /* Update the list of rooms */
 const updateRoomList = (rooms) => {
 	document.querySelector('#room').innerHTML = rooms.map(room => `<option value="${room}">${room}</option>`).join("");
+=======
+/* Start a new game */
+const initGame = (imgCords) => {
+	document.querySelector('#start').classList.add('hide');
+	document.querySelector('#game-view').classList.remove('hide');
+
+	showRoomName(room);
+	startRound(imgCords);
+>>>>>>> dev
 }
 
 /* Show the most recent winning reaction time of both players */
@@ -166,17 +221,10 @@ const showCongratulations = (player, maxRounds) => {
 }
 
 
+
 /*
 * Event handlers
 */
-
-/* When player clicks on virus, send player data and emit "player-click" event */
-virus.addEventListener('click', () => {
-	score ++;
-	reactionTime = reactionTime / 1000 + " seconds";
-
-	socket.emit('player-click', playerAlias, score, reactionTime);
-});
 
 /* When someone submits their alias, emit "add-player" event to server */
 playerForm.addEventListener('submit', e => {
@@ -188,17 +236,44 @@ playerForm.addEventListener('submit', e => {
 	socket.emit('add-player', room, playerAlias);
 });
 
+/* When player clicks on virus, send player data and emit "player-click" event */
+virus.addEventListener('click', () => {
+	score ++;
+	reactionTime = reactionTime / 1000 + " seconds";
+
+	const playerData = {
+		playerAlias,
+		score,
+		reactionTime,
+	}
+
+	socket.emit('player-click', playerData);
+});
+
 
 /*
 * Listening for events emitted from server
 */
 
+<<<<<<< HEAD
 socket.on('reconnect', () => {
 	if (playerAlias) {
 		socket.emit('add-player', playerAlias, () => {
 			console.log("The server acknowledged the reconnection.");
 		});
 	}
+=======
+socket.on('active-players', (players) => {
+	showActivePlayers(players);
+});
+
+socket.on('remaining-players', (players) => {
+	showActivePlayers(players);
+});
+
+socket.on('congratulations', (winner, maxRounds) => {
+	showCongratulations(winner, maxRounds);
+>>>>>>> dev
 });
 
 socket.on('player-disconnected', playerAlias => {
@@ -209,10 +284,17 @@ socket.on('init-game', (imgCords) => {
 	initGame(imgCords);
 });
 
+<<<<<<< HEAD
 socket.on('player-click', (imgCords, players, rounds, maxRounds) => {
 	showScore(players);
 	showReactionTime(players);
 	showRound(rounds, maxRounds)
+=======
+socket.on('player-click', (imgCords, gameData) => {
+	showScore(gameData.players);
+	showReactionTime(gameData.players);
+	showRound(gameData.rounds, gameData.maxRounds)
+>>>>>>> dev
 	startRound(imgCords);
 });
 

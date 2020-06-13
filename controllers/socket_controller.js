@@ -4,7 +4,11 @@ const debug = require('debug')('kill-the-virus:socket_controller');
 
 let io = null;
 let rounds = 0;
+<<<<<<< HEAD
 const maxRounds = 3;
+=======
+const maxRounds = 10;
+>>>>>>> dev
 const players = [];
 let player = {};
 
@@ -35,7 +39,11 @@ const rooms = [
 
 
 /* Get names of active players */
+<<<<<<< HEAD
 function getActivePlayers() {
+=======
+function getPlayerNames() {
+>>>>>>> dev
 	return players.map(player => player.alias);
 }
 
@@ -53,6 +61,7 @@ function getRoomNames() {
 function handlePlayerDisconnect() {
 	for (let i =0; i < players.length; i++) {
 		if (players[i].playerId === this.id) {
+<<<<<<< HEAD
 		players.splice(i,1);
 		break;
 		}
@@ -61,6 +70,16 @@ function handlePlayerDisconnect() {
 	io.emit('active-players', getActivePlayers());
 }
 
+=======
+			players.splice(i,1);
+			break;
+		}
+	}
+
+	io.emit('remaining-players', getPlayerNames());
+}
+
+>>>>>>> dev
 /* Determine the winner/loser and emit personalized messages */
 function determineWinner() {
 
@@ -68,20 +87,23 @@ function determineWinner() {
 	const loser = players.reduce((min, player) => min.score < player.score ? min : player);
 
 	io.to(winner.playerId).emit('congratulations', winner, maxRounds);
+<<<<<<< HEAD
 
+=======
+>>>>>>> dev
 	io.to(loser.playerId).emit('game-over', loser, maxRounds);
 }
 
 /* Handle when a player clicks a virus */
-function handleClick(playerAlias, score, reactionTime) {
+function handleClick(playerData) {
 	rounds++;
 
 	io.emit('reset-timer');
 
 	const playerIndex = players.findIndex((player => player.playerId === this.id));
-	players[playerIndex].alias = playerAlias;
-	players[playerIndex].score = score;
-	players[playerIndex].reactionTime = reactionTime;
+	players[playerIndex].alias = playerData.playerAlias;
+	players[playerIndex].score = playerData.score;
+	players[playerIndex].reactionTime = playerData.reactionTime;
 
 	const imgCords = {
 		target: {
@@ -91,8 +113,18 @@ function handleClick(playerAlias, score, reactionTime) {
 		delay: getRandomNumber(5000),
 	};
 
+	const gameData = {
+		players,
+		rounds,
+		maxRounds,
+	}
+
 	if (rounds < maxRounds) {
+<<<<<<< HEAD
 		io.emit('player-click', imgCords, players, rounds, maxRounds);
+=======
+		io.emit('player-click', imgCords, gameData);
+>>>>>>> dev
 	} else if (rounds === maxRounds) {
 		determineWinner();
 	}
@@ -105,7 +137,7 @@ function handleGetRoomList(callback) {
 
 /* Handle new player joining game */
 function handleNewPlayer(room, playerAlias) {
-	const activePlayers = getActivePlayers();
+	const activePlayers = getPlayerNames();
 
 	this.join(room);
 
@@ -130,7 +162,7 @@ function handleNewPlayer(room, playerAlias) {
 		players.push(player)
 
 		// Emit active players and event to start new game
-		io.in(room).emit('active-players', getActivePlayers());
+		io.in(room).emit('active-players', getPlayerNames());
 		io.in(room).emit('init-game', imgCords);
 	} else {
 		console.log("Too many players...")
