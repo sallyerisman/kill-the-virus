@@ -104,13 +104,13 @@ h2 {
 	left: 200px;
 }
 
-#game-data {
+.game-data {
 	color: white;
 	width: 20%;
 	border-left: 1px solid #CDD7E2;
 }
 
-#game-data h3 {
+.game-data h3 {
 	color: #28A745;
 	font-size: 1em;
 	text-align: left;
@@ -118,7 +118,7 @@ h2 {
 	padding: 0.5rem 0.75rem;
 }
 
-#game-data ul {
+.game-data ul {
 	margin: 0;
 	padding: 0.5rem 0.75rem;
 	list-style: none;
