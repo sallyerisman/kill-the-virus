@@ -3,12 +3,11 @@
 const debug = require('debug')('kill-the-virus:socket_controller');
 
 let io = null;
+
 let rounds = 0;
-<<<<<<< HEAD
 const maxRounds = 3;
-=======
 const maxRounds = 10;
->>>>>>> dev
+const maxRounds = 3;
 const players = [];
 let player = {};
 
@@ -39,11 +38,7 @@ const rooms = [
 
 
 /* Get names of active players */
-<<<<<<< HEAD
-function getActivePlayers() {
-=======
 function getPlayerNames() {
->>>>>>> dev
 	return players.map(player => player.alias);
 }
 
@@ -61,16 +56,6 @@ function getRoomNames() {
 function handlePlayerDisconnect() {
 	for (let i =0; i < players.length; i++) {
 		if (players[i].playerId === this.id) {
-<<<<<<< HEAD
-		players.splice(i,1);
-		break;
-		}
-   	}
-
-	io.emit('active-players', getActivePlayers());
-}
-
-=======
 			players.splice(i,1);
 			break;
 		}
@@ -79,19 +64,14 @@ function handlePlayerDisconnect() {
 	io.emit('remaining-players', getPlayerNames());
 }
 
->>>>>>> dev
 /* Determine the winner/loser and emit personalized messages */
 function determineWinner() {
 
 	const winner = players.reduce((max, player) => max.score > player.score ? max : player);
 	const loser = players.reduce((min, player) => min.score < player.score ? min : player);
 
-	io.to(winner.playerId).emit('congratulations', winner, maxRounds);
-<<<<<<< HEAD
-
-=======
->>>>>>> dev
-	io.to(loser.playerId).emit('game-over', loser, maxRounds);
+	io.to(winner.playerId).emit('congratulations', { winner, maxRounds });
+	io.to(loser.playerId).emit('game-over', {loser, maxRounds });
 }
 
 /* Handle when a player clicks a virus */
@@ -120,13 +100,10 @@ function handleClick(playerData) {
 	}
 
 	if (rounds < maxRounds) {
-<<<<<<< HEAD
-		io.emit('player-click', imgCords, players, rounds, maxRounds);
-=======
-		io.emit('player-click', imgCords, gameData);
->>>>>>> dev
+		io.emit('new-round', imgCords, gameData);
 	} else if (rounds === maxRounds) {
 		determineWinner();
+		rounds = 0;
 	}
 }
 
