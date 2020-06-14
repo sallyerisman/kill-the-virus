@@ -3,8 +3,9 @@
 const debug = require('debug')('kill-the-virus:socket_controller');
 
 let io = null;
+
 let rounds = 0;
-const maxRounds = 10;
+const maxRounds = 3;
 const players = [];
 let player = {};
 
@@ -67,8 +68,8 @@ function determineWinner() {
 	const winner = players.reduce((max, player) => max.score > player.score ? max : player);
 	const loser = players.reduce((min, player) => min.score < player.score ? min : player);
 
-	io.to(winner.playerId).emit('congratulations', winner, maxRounds);
-	io.to(loser.playerId).emit('game-over', loser, maxRounds);
+	io.to(winner.playerId).emit('congratulations', { winner, maxRounds });
+	io.to(loser.playerId).emit('game-over', {loser, maxRounds });
 }
 
 /* Handle when a player clicks a virus */
@@ -97,9 +98,10 @@ function handleClick(playerData) {
 	}
 
 	if (rounds < maxRounds) {
-		io.emit('player-click', imgCords, gameData);
+		io.emit('new-round', imgCords, gameData);
 	} else if (rounds === maxRounds) {
 		determineWinner();
+		rounds = 0;
 	}
 }
 

@@ -22,12 +22,9 @@ let score = 0;
 let timeOfImg = null;
 
 
-/* Show virus in new location */
-const imgCoordinates = (target) => {
-	virus.style.display = "inline";
-	virus.style.left = target.x + "px";
-	virus.style.top = target.y + "px";
-}
+/*
+* Render functions
+*/
 
 /* Log player connect/disconnect events */
 const infoFromAdmin = (data) => {
@@ -37,16 +34,6 @@ const infoFromAdmin = (data) => {
 	notification.innerHTML = data;
 
 	activePlayers.appendChild(notification);
-}
-
-const getRoomList = () => {
-	socket.emit('get-room-list', (rooms) => {
-		updateRoomList(rooms)
-	})
-}
-
-const updateRoomList = (rooms) => {
-	document.querySelector('#room').innerHTML = rooms.map(room => `<option value="${room}">${room}</option>`).join("");
 }
 
 /* Show all player in the current game */
@@ -91,11 +78,11 @@ const showRoomName = (roomEl) => {
 }
 
 /* Show number of rounds played */
-const showRound = (round, maxRounds) => {
+const showRound = (rounds, maxRounds) => {
 	roundsPlayed.innerHTML = "";
 
 	const roundEl = document.createElement('li');
-	roundEl.innerHTML = `${round}/${maxRounds}`;
+	roundEl.innerHTML = `${rounds}/${maxRounds}`;
 
 	roundsPlayed.appendChild(roundEl);
 }
@@ -104,6 +91,31 @@ const showRound = (round, maxRounds) => {
 const showScore = (players) => {
 	currentScore.innerHTML = "";
 	currentScore.innerHTML = players.map(player => `<li>${player.alias}: ${player.score}</li>`).join("");
+}
+
+const updateRoomList = (rooms) => {
+	document.querySelector('#room').innerHTML = rooms.map(room => `<option value="${room}">${room}</option>`).join("");
+}
+
+
+
+
+
+/*
+* Main functions
+*/
+
+const getRoomList = () => {
+	socket.emit('get-room-list', (rooms) => {
+		updateRoomList(rooms)
+	})
+}
+
+/* Show virus in new location */
+const imgCoordinates = (target) => {
+	virus.style.display = "inline";
+	virus.style.left = target.x + "px";
+	virus.style.top = target.y + "px";
 }
 
 /* Empty timer field */
@@ -203,23 +215,21 @@ socket.on('active-players', (players) => {
 	showActivePlayers(players);
 });
 
-socket.on('remaining-players', (players) => {
-	showActivePlayers(players);
-});
-
-socket.on('congratulations', (winner, maxRounds) => {
+socket.on('congratulations', ({ winner, maxRounds }) => {
 	showCongratulations(winner, maxRounds);
+	resetTimer();
 });
 
-socket.on('game-over', (player, maxRounds) => {
-	showGameOver(player, maxRounds);
+socket.on('game-over', ({ loser, maxRounds }) => {
+	showGameOver(loser, maxRounds);
+	resetTimer();
 });
 
 socket.on('init-game', (imgCords) => {
 	initGame(imgCords);
 });
 
-socket.on('player-click', (imgCords, gameData) => {
+socket.on('new-round', (imgCords, gameData) => {
 	showScore(gameData.players);
 	showReactionTime(gameData.players);
 	showRound(gameData.rounds, gameData.maxRounds)
@@ -236,6 +246,10 @@ socket.on('reconnect', () => {
 			console.log("The server acknowledged the reconnection.");
 		});
 	}
+});
+
+socket.on('remaining-players', (players) => {
+	showActivePlayers(players);
 });
 
 socket.on('reset-timer', () => {
