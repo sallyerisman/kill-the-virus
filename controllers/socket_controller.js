@@ -9,27 +9,6 @@ const maxRounds = 3;
 const players = [];
 let player = {};
 
-/* Get names of active players */
-function getPlayerNames() {
-	return players.map(player => player.alias);
-}
-
-/* Generic function for getting a random number */
-function getRandomNumber(range) {
-	return Math.floor(Math.random() * range)
-};
-
-/* Handle player disconnecting */
-function handlePlayerDisconnect() {
-	for (let i =0; i < players.length; i++) {
-		if (players[i].playerId === this.id) {
-			players.splice(i,1);
-			break;
-		}
-	}
-
-	io.emit('remaining-players', getPlayerNames());
-}
 
 /* Determine the winner/loser and emit personalized messages */
 function determineWinner() {
@@ -40,6 +19,21 @@ function determineWinner() {
 	io.to(winner.playerId).emit('congratulations', { winner, maxRounds });
 	io.to(loser.playerId).emit('game-over', {loser, maxRounds });
 }
+
+/* Get the player object of a specific player by their id */
+function getPlayerById(id) {
+	return players.find(player => player.playerId === id);
+}
+
+/* Get names of active players */
+function getPlayerNames() {
+	return players.map(player => player.alias);
+}
+
+/* Generic function for getting a random number */
+function getRandomNumber(range) {
+	return Math.floor(Math.random() * range)
+};
 
 /* Handle when a player clicks a virus */
 function handleClick(playerData) {
@@ -75,7 +69,7 @@ function handleClick(playerData) {
 }
 
 /* Handle new player joining game */
-function handleNewPlayer(playerAlias) {
+function handleNewPlayer(playerAlias, callback) {
 	const activePlayers = getPlayerNames();
 
 	const imgCords = {
@@ -95,16 +89,45 @@ function handleNewPlayer(playerAlias) {
 
 	if (activePlayers.length === 0) {
 		players.push(player)
+
+		callback({
+			joinGame: true,
+			activePlayers: getPlayerNames(),
+		});
+
 	} else if (activePlayers.length === 1) {
 		players.push(player)
+
+		callback({
+			joinGame: true,
+			activePlayers: getPlayerNames(),
+		});
 
 		// Emit active players and event to start new game
 		io.emit('active-players', getPlayerNames());
 		io.emit('init-game', imgCords);
-	} else {
-		console.log("Too many players...")
 	}
 }
+
+/* Handle player disconnecting */
+function handlePlayerDisconnect() {
+
+	const player = getPlayerById(this.id);
+
+	this.broadcast.emit('player-disconnected', player.alias)
+
+	for (let i =0; i < players.length; i++) {
+		if (players[i].playerId === this.id) {
+			players.splice(i,1);
+			break;
+		}
+	}
+
+	io.emit('remaining-players', getPlayerNames());
+}
+
+
+
 
 module.exports = function(socket) {
 	debug(`Client ${socket.id} connected!`);

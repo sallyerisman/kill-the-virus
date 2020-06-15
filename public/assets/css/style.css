@@ -97,6 +97,10 @@ h2 {
 	left: 1.5rem;
 }
 
+#img-virus-play.hide {
+	display: none;
+}
+
 #img-virus-play {
 	width: 3%;
 	position: absolute;
@@ -124,8 +128,12 @@ h2 {
 	list-style: none;
 }
 
-#active-players .notification {
-	background-color: white;
+#admin-info ul {
+	margin-top: 2rem;
+}
+
+#admin-info .notification {
+	color: yellow;
 	font-style: italic;
 }
 

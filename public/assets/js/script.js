@@ -3,6 +3,7 @@
 const socket = io();
 
 const activePlayers = document.querySelector('#active-players');
+const adminInfo = document.querySelector('#admin-info');
 const congratulations = document.querySelector('#congratulations');
 const currentScore = document.querySelector('#current-score');
 const gameOver = document.querySelector('#game-over');
@@ -28,10 +29,10 @@ let timeOfImg = null;
 const infoFromAdmin = (data) => {
 	const notification = document.createElement('li');
 
-	notification.classList.add('list-group-item', 'list-group-item-light', 'notification');
+	notification.classList.add('notification');
 	notification.innerHTML = data;
 
-	activePlayers.appendChild(notification);
+	adminInfo.appendChild(notification);
 }
 
 /* Show all player in the current game */
@@ -90,11 +91,29 @@ const showScore = (players) => {
 * Main functions
 */
 
+/* Handle when a player disconnects */
+const handleDisconnect = (playerAlias) => {
+	infoFromAdmin(`${playerAlias} left the game`);
+	resetTimer();
+}
+
 /* Show virus in new location */
 const imgCoordinates = (target) => {
 	virus.style.display = "inline";
 	virus.style.left = target.x + "px";
 	virus.style.top = target.y + "px";
+}
+
+/* Start a new game */
+const initGame = (imgCords) => {
+
+	infoFromAdmin("Starting game...");
+
+	setTimeout(() => {
+		adminInfo.innerHTML = "";
+		virus.classList.remove('hide');
+		startRound(imgCords);
+	}, 3000);
 }
 
 /* Empty timer field */
@@ -146,14 +165,6 @@ const startRound = (imgCords) => {
 	}, imgCords.delay);
 }
 
-/* Start a new game */
-const initGame = (imgCords) => {
-	document.querySelector('#start').classList.add('hide');
-	document.querySelector('#game-view').classList.remove('hide');
-
-	startRound(imgCords);
-}
-
 
 
 /*
@@ -166,7 +177,14 @@ playerForm.addEventListener('submit', e => {
 
 	playerAlias = document.querySelector('#player-alias').value;
 
-	socket.emit('add-player', playerAlias );
+	socket.emit('add-player', playerAlias, (status) => {
+		if (status.joinGame) {
+			document.querySelector('#start').classList.add('hide');
+			document.querySelector('#game-view').classList.remove('hide');
+
+			showActivePlayers(status.activePlayers);
+		}
+	});
 });
 
 /* When player clicks on virus, send player data and emit "player-click" event */
@@ -214,7 +232,7 @@ socket.on('new-round', (imgCords, gameData) => {
 });
 
 socket.on('player-disconnected', playerAlias => {
-	infoFromAdmin(`${playerAlias} left the game`);
+	handleDisconnect (playerAlias);
 });
 
 socket.on('reconnect', () => {
