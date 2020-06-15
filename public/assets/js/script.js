@@ -4,7 +4,6 @@ const socket = io();
 
 const activePlayers = document.querySelector('#active-players');
 const congratulations = document.querySelector('#congratulations');
-const currentRoom = document.querySelector('#current-room');
 const currentScore = document.querySelector('#current-score');
 const gameOver = document.querySelector('#game-over');
 const playerForm = document.querySelector('#player-form');
@@ -17,7 +16,6 @@ const virus = document.getElementById('img-virus-play');
 let currTime = null;
 let playerAlias = "";
 let reactionTime = "";
-let room = null;
 let score = 0;
 let timeOfImg = null;
 
@@ -67,16 +65,6 @@ const showReactionTime = (players) => {
 	reactionTimes.innerHTML = players.map(player => `<li>${player.alias}: ${player.reactionTime}</li>`).join("");
 }
 
-/* Show name of current room */
-const showRoomName = (roomEl) => {
-	currentRoom.innerHTML = "";
-
-	const roomName = document.createElement('li');
-	roomName.innerHTML = `${roomEl}`;
-
-	currentRoom.appendChild(roomName);
-}
-
 /* Show number of rounds played */
 const showRound = (rounds, maxRounds) => {
 	roundsPlayed.innerHTML = "";
@@ -93,9 +81,6 @@ const showScore = (players) => {
 	currentScore.innerHTML = players.map(player => `<li>${player.alias}: ${player.score}</li>`).join("");
 }
 
-const updateRoomList = (rooms) => {
-	document.querySelector('#room').innerHTML = rooms.map(room => `<option value="${room}">${room}</option>`).join("");
-}
 
 
 
@@ -104,12 +89,6 @@ const updateRoomList = (rooms) => {
 /*
 * Main functions
 */
-
-const getRoomList = () => {
-	socket.emit('get-room-list', (rooms) => {
-		updateRoomList(rooms)
-	})
-}
 
 /* Show virus in new location */
 const imgCoordinates = (target) => {
@@ -172,7 +151,6 @@ const initGame = (imgCords) => {
 	document.querySelector('#start').classList.add('hide');
 	document.querySelector('#game-view').classList.remove('hide');
 
-	showRoomName(room);
 	startRound(imgCords);
 }
 
@@ -187,9 +165,8 @@ playerForm.addEventListener('submit', e => {
 	e.preventDefault();
 
 	playerAlias = document.querySelector('#player-alias').value;
-	room = playerForm.room.value;
 
-	socket.emit('add-player', room, playerAlias);
+	socket.emit('add-player', playerAlias );
 });
 
 /* When player clicks on virus, send player data and emit "player-click" event */
@@ -257,11 +234,6 @@ socket.on('reset-timer', () => {
 });
 
 
-/*
-* Functions to run directly on page load
-*/
-window.onload = () => {
-	getRoomList();
-}
+
 
 

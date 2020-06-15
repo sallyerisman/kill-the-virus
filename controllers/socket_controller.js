@@ -6,36 +6,8 @@ let io = null;
 
 let rounds = 0;
 const maxRounds = 3;
-const maxRounds = 10;
-const maxRounds = 3;
 const players = [];
 let player = {};
-
-const rooms = [
-	{
-		name: "Corona",
-		players: {},
-	},
-	{
-		name: "Ebola",
-		players: {},
-	},
-	{
-		name: "SARS",
-		players: {},
-	},
-	{
-		name: "Swine flu",
-		players: {},
-	},
-	{
-		name: "Zika",
-		players: {},
-	}
-];
-
-
-
 
 /* Get names of active players */
 function getPlayerNames() {
@@ -46,11 +18,6 @@ function getPlayerNames() {
 function getRandomNumber(range) {
 	return Math.floor(Math.random() * range)
 };
-
-/* Get names of rooms */
-function getRoomNames() {
-	return rooms.map(room => room.name);
-}
 
 /* Handle player disconnecting */
 function handlePlayerDisconnect() {
@@ -107,16 +74,9 @@ function handleClick(playerData) {
 	}
 }
 
-/* Get a list of all rooms */
-function handleGetRoomList(callback) {
-	callback(getRoomNames());
-}
-
 /* Handle new player joining game */
-function handleNewPlayer(room, playerAlias) {
+function handleNewPlayer(playerAlias) {
 	const activePlayers = getPlayerNames();
-
-	this.join(room);
 
 	const imgCords = {
 		target: {
@@ -139,8 +99,8 @@ function handleNewPlayer(room, playerAlias) {
 		players.push(player)
 
 		// Emit active players and event to start new game
-		io.in(room).emit('active-players', getPlayerNames());
-		io.in(room).emit('init-game', imgCords);
+		io.emit('active-players', getPlayerNames());
+		io.emit('init-game', imgCords);
 	} else {
 		console.log("Too many players...")
 	}
@@ -154,6 +114,5 @@ module.exports = function(socket) {
 	socket.on('disconnect', handlePlayerDisconnect);
 	socket.on('player-click', handleClick);
 	socket.on('add-player', handleNewPlayer);
-	socket.on('get-room-list', handleGetRoomList)
 }
 
