@@ -5,7 +5,7 @@ const debug = require('debug')('kill-the-virus:socket_controller');
 let io = null;
 
 let rounds = 0;
-const maxRounds = 10;
+const maxRounds = 3;
 const players = [];
 let player = {};
 
@@ -20,12 +20,11 @@ function determineWinner() {
 	io.to(loser.playerId).emit('game-over', {loser, maxRounds });
 }
 
-/* Get new coordinates for the virus image */
-function getCoordinates(x, y) {
+function getImgCords() {
 	return {
 		target: {
-			x: getRandomNumber(x),
-			y: getRandomNumber(y)
+			x: getRandomNumber(400),
+			y: getRandomNumber(400)
 		},
 		delay: getRandomNumber(5000),
 	};
@@ -47,7 +46,7 @@ function getRandomNumber(range) {
 };
 
 /* Handle when a player clicks a virus */
-function handleClick(playerData, x, y) {
+function handleClick(playerData) {
 	rounds++;
 
 	io.emit('reset-timer');
@@ -57,7 +56,7 @@ function handleClick(playerData, x, y) {
 	players[playerIndex].score = playerData.score;
 	players[playerIndex].reactionTime = playerData.reactionTime;
 
-	const imgCords = getCoordinates(x, y);
+	const imgCords = getImgCords();
 
 	const gameData = {
 		players,
@@ -76,6 +75,8 @@ function handleClick(playerData, x, y) {
 /* Handle new player joining game */
 function handleNewPlayer(playerAlias, callback) {
 	const activePlayers = getPlayerNames();
+
+	const imgCords = getImgCords();
 
 	player = {
 		playerId: this.id,
@@ -103,7 +104,7 @@ function handleNewPlayer(playerAlias, callback) {
 
 		// Emit active players and event to start new game
 		io.emit('active-players', getPlayerNames());
-		io.emit('init-game');
+		io.emit('init-game', imgCords);
 	}
 
 	else {

@@ -19,8 +19,6 @@ let playerAlias = "";
 let reactionTime = "";
 let score = 0;
 let timeOfImg = null;
-let x = null;
-let y = null;
 
 
 /*
@@ -119,11 +117,7 @@ const initGame = (imgCords) => {
 	setTimeout(() => {
 		adminInfo.innerHTML = "";
 		virus.classList.remove('hide');
-		const target = {
-			x: x/2,
-			y: y/2,
-		}
-		startRound(target);
+		startRound(imgCords);
 	}, 3000);
 }
 
@@ -217,10 +211,7 @@ virus.addEventListener('click', () => {
 		reactionTime,
 	}
 
-	x = playingField.offsetWidth;
-	y = playingField.offsetHeight;
-
-	socket.emit('player-click', playerData, x, y);
+	socket.emit('player-click', playerData);
 });
 
 
@@ -242,8 +233,8 @@ socket.on('game-over', ({ loser, maxRounds }) => {
 	resetTimer();
 });
 
-socket.on('init-game', () => {
-	initGame();
+socket.on('init-game', (imgCords) => {
+	initGame(imgCords);
 });
 
 socket.on('new-round', (imgCords, gameData) => {
