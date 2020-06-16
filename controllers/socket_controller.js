@@ -93,6 +93,7 @@ function handleNewPlayer(playerAlias, callback) {
 		callback({
 			joinGame: true,
 			activePlayers: getPlayerNames(),
+			firstPlayer: true,
 		});
 
 	} else if (activePlayers.length === 1) {

@@ -27,6 +27,7 @@ let timeOfImg = null;
 
 /* Log player connect/disconnect events */
 const infoFromAdmin = (data) => {
+	adminInfo.innerHTML = "";
 	const notification = document.createElement('li');
 
 	notification.classList.add('notification');
@@ -106,7 +107,6 @@ const imgCoordinates = (target) => {
 
 /* Start a new game */
 const initGame = (imgCords) => {
-
 	infoFromAdmin("Starting game...");
 
 	setTimeout(() => {
@@ -183,6 +183,10 @@ playerForm.addEventListener('submit', e => {
 			document.querySelector('#game-view').classList.remove('hide');
 
 			showActivePlayers(status.activePlayers);
+		}
+
+		if (status.firstPlayer) {
+			infoFromAdmin("Wait here for a second player to join...");
 		}
 	});
 });
