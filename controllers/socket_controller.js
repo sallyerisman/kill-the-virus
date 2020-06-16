@@ -5,7 +5,7 @@ const debug = require('debug')('kill-the-virus:socket_controller');
 let io = null;
 
 let rounds = 0;
-const maxRounds = 3;
+const maxRounds = 10;
 const players = [];
 let player = {};
 
