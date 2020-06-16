@@ -36,6 +36,11 @@ const infoFromAdmin = (data) => {
 	adminInfo.appendChild(notification);
 }
 
+/* Show alert message to person trying to access a game that is full */
+const showAccessDenied = (msg) => {
+	alert(msg);
+}
+
 /* Show all player in the current game */
 const showActivePlayers = (players) => {
 	activePlayers.innerHTML = players.map(player => `<li class="player">${player}</li>`).join("");
@@ -187,6 +192,10 @@ playerForm.addEventListener('submit', e => {
 
 		if (status.firstPlayer) {
 			infoFromAdmin("Wait here for a second player to join...");
+		}
+
+		if (status.gameOccupied) {
+			showAccessDenied("Sorry, two people are already playing. Try again later.")
 		}
 	});
 });

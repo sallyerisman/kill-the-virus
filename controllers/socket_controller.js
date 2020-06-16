@@ -108,6 +108,12 @@ function handleNewPlayer(playerAlias, callback) {
 		io.emit('active-players', getPlayerNames());
 		io.emit('init-game', imgCords);
 	}
+
+	else {
+		callback({
+			gameOccupied: true,
+		})
+	}
 }
 
 /* Handle player disconnecting */
