@@ -20,6 +20,17 @@ function determineWinner() {
 	io.to(loser.playerId).emit('game-over', {loser, maxRounds });
 }
 
+/* Get new coordinates for the virus image */
+function getCoordinates(x, y) {
+	return {
+		target: {
+			x: getRandomNumber(x),
+			y: getRandomNumber(y)
+		},
+		delay: getRandomNumber(5000),
+	};
+}
+
 /* Get the player object of a specific player by their id */
 function getPlayerById(id) {
 	return players.find(player => player.playerId === id);
@@ -36,7 +47,7 @@ function getRandomNumber(range) {
 };
 
 /* Handle when a player clicks a virus */
-function handleClick(playerData) {
+function handleClick(playerData, x, y) {
 	rounds++;
 
 	io.emit('reset-timer');
@@ -46,13 +57,7 @@ function handleClick(playerData) {
 	players[playerIndex].score = playerData.score;
 	players[playerIndex].reactionTime = playerData.reactionTime;
 
-	const imgCords = {
-		target: {
-			x: getRandomNumber(400),
-			y: getRandomNumber(400)
-		},
-		delay: getRandomNumber(5000),
-	};
+	const imgCords = getCoordinates(x, y);
 
 	const gameData = {
 		players,
@@ -71,14 +76,6 @@ function handleClick(playerData) {
 /* Handle new player joining game */
 function handleNewPlayer(playerAlias, callback) {
 	const activePlayers = getPlayerNames();
-
-	const imgCords = {
-		target: {
-			x: getRandomNumber(400),
-			y: getRandomNumber(400)
-		},
-		delay: getRandomNumber(5000),
-	};
 
 	player = {
 		playerId: this.id,
@@ -106,7 +103,7 @@ function handleNewPlayer(playerAlias, callback) {
 
 		// Emit active players and event to start new game
 		io.emit('active-players', getPlayerNames());
-		io.emit('init-game', imgCords);
+		io.emit('init-game');
 	}
 
 	else {
