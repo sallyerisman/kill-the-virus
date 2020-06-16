@@ -107,7 +107,6 @@ const handleDisconnect = (playerAlias) => {
 
 /* Show virus in new location */
 const imgCoordinates = (target) => {
-	console.log("target: ", target)
 	virus.style.display = "inline";
 	virus.style.left = target.x + "px";
 	virus.style.top = target.y + "px";
