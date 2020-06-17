@@ -35,7 +35,7 @@ h2 {
 }
 
 .img-virus-start {
-	width: 20%;
+	width: 15%;
 	max-width: 120px;
 }
 
@@ -77,19 +77,10 @@ h2 {
 	background-position: center;
 	height: 420px;
 	width: 420px;
-	position: relative;
 }
 
 #playing-field.hide {
 	display: none;
-}
-
-#timer {
-	color: red;
-	font-size: 1.5em;
-	position: fixed;
-	top: 1rem;
-	left: 1.5rem;
 }
 
 #img-virus-play.hide {
@@ -123,6 +114,10 @@ h2 {
 	list-style: none;
 }
 
+.game-data ul li {
+	font-size: 0.8rem;
+}
+
 #admin-info ul {
 	margin-top: 2rem;
 }
@@ -130,6 +125,11 @@ h2 {
 #admin-info .notification {
 	color: yellow;
 	font-style: italic;
+}
+
+#timer {
+	color: red;
+	padding: 0.5rem 0.75rem;
 }
 
 #game-over {
